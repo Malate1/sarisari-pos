@@ -1,6 +1,7 @@
 // src/Scanner.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
+import { Html5Qrcode } from "html5-qrcode";
 
 export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
   const scannerRef = useRef(null);
@@ -28,20 +29,28 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
     const initializeScanner = () => {
       try {
         // Initialize the scanner when the component mounts
-        const scanner = new Html5QrcodeScanner(
-          "reader", 
-          { 
-            fps: 15, // Higher FPS for smoother scanning
-            qrbox: { width: 280, height: 280 },
-            rememberLastUsedCamera: true,
-            supportedScanTypes: [0], // 0 means camera scanning only
-            aspectRatio: 1.0,
-            showTorchButtonIfSupported: true,
-            showZoomSliderIfSupported: true,
-            defaultZoomValueIfSupported: 2,
-          }, 
-          /* verbose= */ false
-        );
+        const scanner = new Html5Qrcode("reader");
+
+				const config = {
+					fps: 60,
+					qrbox: { width: 280, height: 280 },
+				};
+
+				scanner.start(
+					{ facingMode: "environment" }, // 👈 BACK CAMERA
+					config,
+					(decodedText, decodedResult) => {
+						playSuccessFeedback();
+						if (onScanSuccess) onScanSuccess(decodedText, decodedResult);
+
+						setTimeout(() => {
+							if (onClose) onClose();
+						}, 500);
+					},
+					(errorMessage) => {
+						if (onScanFailure) onScanFailure(errorMessage);
+					},
+				);
 
         scannerRef.current = scanner;
         setIsScannerReady(true);
