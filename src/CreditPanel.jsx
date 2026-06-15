@@ -279,7 +279,6 @@ export default function CreditPanel({ onClose }) {
 						notes: notes || null,
 						status: "unpaid",
 						paidAmount: 0,
-						created_at: new Date().toISOString(),
 						updated_at: new Date().toISOString(),
 					},
 				])
