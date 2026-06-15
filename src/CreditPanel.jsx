@@ -28,7 +28,7 @@ export default function CreditPanel({ onClose }) {
 
   // Fetch all credit records
   const creditLogs =
-    useLiveQuery(() => db.creditLog.orderBy("id").reverse().toArray(), []) ||
+    useLiveQuery(() => db.from('credit_log').orderBy("id").reverse().toArray(), []) ||
     [];
 
   // Search products as user types
@@ -231,9 +231,9 @@ export default function CreditPanel({ onClose }) {
     if (!result.isConfirmed) return;
 
     try {
-      await db.transaction("rw", [db.inventory, db.creditLog], async () => {
+      await db.transaction("rw", [db.inventory, db.from('credit_log')], async () => {
         // Create credit record
-        const creditId = await db.creditLog.add({
+        const creditId = await db.from('credit_log').add({
           customerName: customerName.trim(),
           customerPhone: customerPhone.trim() || null,
           amount: totalAmount,
@@ -340,7 +340,7 @@ export default function CreditPanel({ onClose }) {
         }
 
         // Delete the credit record
-        await db.creditLog.delete(credit.id);
+        await db.from('credit_log').delete(credit.id);
         
         toast.success(`Credit record for "${credit.customerName}" has been cancelled and items restored to inventory.`, {
             duration: 4000,
@@ -398,7 +398,7 @@ export default function CreditPanel({ onClose }) {
     const newStatus = newPaidAmount >= credit.amount ? "paid" : "partial";
 
     try {
-      await db.creditLog.update(credit.id, {
+      await db.from('credit_log').update(credit.id, {
         paidAmount: newPaidAmount,
         status: newStatus,
         updatedAt: new Date().toISOString(),
