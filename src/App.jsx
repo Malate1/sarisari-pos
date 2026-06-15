@@ -330,7 +330,7 @@ export default function App() {
 	};
 
 	const totalAmount = cart.reduce(
-		(sum, item) => sum + item.sellingPrice * item.quantity,
+		(sum, item) => sum + item.selling_price * item.quantity,
 		0,
 	);
 	const changeDue =
@@ -382,8 +382,8 @@ export default function App() {
 							product_id: item.id,
 							product_name: item.name,
 							quantity: item.quantity,
-							price: item.sellingPrice,
-							subtotal: item.sellingPrice * item.quantity,
+							price: item.selling_price,
+							subtotal: item.selling_price * item.quantity,
 						});
 
 						const { data: dbItem } = await db
@@ -861,7 +861,7 @@ export default function App() {
 																	SKU: {item.barcode || "N/A"}
 																</span>
 																<span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-																	₱{item.sellingPrice.toFixed(2)} each
+																	₱{item.selling_price.toFixed(2)} each
 																</span>
 															</div>
 														</div>
@@ -920,7 +920,7 @@ export default function App() {
 														<div className="text-right">
 															<p className="font-bold text-gray-800 text-lg">
 																₱
-																{(item.sellingPrice * item.quantity).toFixed(2)}
+																{(item.selling_price * item.quantity).toFixed(2)}
 															</p>
 														</div>
 													</div>
