@@ -217,7 +217,7 @@ export default function InventoryPanel({ initialBarcode }) {
 						className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
 						<div
 							className={`bg-gradient-to-r ${editingId ? "from-orange-500 to-red-500" : "from-blue-600 to-purple-600"} px-6 py-4`}>
-							<h2 className="text-white font-bold text-lg flex items-center gap-2">
+							<h2 className="font-googlesans text-white font-bold text-lg flex items-center gap-2">
 								{editingId ? "✏️ Edit Product" : "➕ Add New Product"}
 							</h2>
 							<p className="text-white/80 text-xs mt-1">
@@ -230,14 +230,14 @@ export default function InventoryPanel({ initialBarcode }) {
 						<form onSubmit={handleSaveProduct} className="p-6 space-y-4">
 							<div>
 								<label className="block text-xs font-bold text-gray-600 uppercase mb-2">
-									Product Name <span className="text-red-500">*</span>
+									Product Name <span className="font-googlesans text-red-500">*</span>
 								</label>
 								<input
 									type="text"
 									value={name}
 									onChange={(e) => setName(e.target.value)}
 									placeholder="e.g., Century Tuna Hot & Spicy 155g"
-									className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none transition-all duration-200 font-medium text-sm"
+									className="font-googlesans w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none transition-all duration-200 font-medium text-sm"
 									required
 								/>
 							</div>
