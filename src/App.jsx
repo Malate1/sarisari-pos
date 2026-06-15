@@ -661,7 +661,7 @@ export default function App() {
 							{/* Barcode Search Card */}
 							<div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-visible hover:shadow-2xl transition-shadow duration-300">
 								<div className="bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3">
-									<h3 className="text-white font-semibold text-sm flex items-center gap-2">
+									<h3 className="font-googlesans text-white font-semibold text-sm flex items-center gap-2">
 										🔍 Scan or Search Product
 									</h3>
 								</div>
