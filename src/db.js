@@ -1,24 +1,6 @@
-// src/db.js
-import Dexie from 'dexie';
+import { createClient } from '@supabase/supabase-js';
 
-// 1. Create the local browser database instance
-export const db = new Dexie('SariSariStoreDB');
+const supabaseUrl = 'https://qfboinikicjlevwvujuz.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmYm9pbmlraWNqbGV2d3Z1anV6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDQ1NjAzNSwiZXhwIjoyMDk2MDMyMDM1fQ.uynGGpN0h2O9fxi_SpS_mZDhWA7gBr--J_DsFpXyZDA';
 
-// 2. Define the schema tables and indexes
-// IMPORTANT: Only index fields you intend to search or filter with (.where())
-db.version(1).stores({
-  inventory: '++id, &barcode, name', 
-  // '++id' auto-increments unique primary IDs
-  // '&barcode' ensures every barcode is completely unique (no duplicates)
-  // 'name' is indexed for quick search lookup
-
-  sales: '++id, timestamp',
-  // 'timestamp' is indexed to pull sales reports by specific dates
-
-  saleItems: '++id, saleId, productId',
-  // 'saleId' links back to parent sales transaction
-  // 'productId' links back to the source inventory item
-
-  creditLog: '++id, customerName, status'
-  // 'customerName' and 'status' (e.g., 'unpaid', 'paid') tracking for "lista" records
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
