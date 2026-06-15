@@ -611,10 +611,10 @@ export default function App() {
 
 							<div>
 								<h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-									Sari-Sari POS
+									LM SariHub
 								</h1>
 								<p className="text-xs text-gray-500">
-									Offline Store Manager v1.0
+									Online Store Manager v1.0
 								</p>
 							</div>
 						</div>
