@@ -1106,7 +1106,7 @@ export default function ReportsPanel({ onClose }) {
 														₱{(item.cost_price || 0).toFixed(2)}
 													</td>
 													<td className="py-2 text-right">
-														₱{(item.selling_priceupdate || 0).toFixed(2)}
+														₱{(item.selling_price || 0).toFixed(2)}
 													</td>
 													<td
 														className={`py-2 text-right font-semibold ${item.stock === 0 ? "text-red-600" : item.stock < 5 ? "text-yellow-600" : "text-green-600"}`}>
