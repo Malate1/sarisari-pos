@@ -456,7 +456,7 @@ export default function CreditPanel({ onClose }) {
 				.update({
 					paidAmount: newPaidAmount,
 					status: newStatus,
-					updatedAt: new Date().toISOString(),
+					updated_att: new Date().toISOString(),
 					...(newStatus === "paid" && {
 						updated_at: new Date().toISOString(),
 					}),
