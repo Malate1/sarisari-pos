@@ -280,7 +280,7 @@ export default function CreditPanel({ onClose }) {
 						status: "unpaid",
 						paidAmount: 0,
 						created_at: new Date().toISOString(),
-						updatedAt: new Date().toISOString(),
+						updated_at: new Date().toISOString(),
 					},
 				])
 				.select()
