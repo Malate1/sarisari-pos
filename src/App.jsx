@@ -26,7 +26,6 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [cashReceived, setCashReceived] = useState('');
 
-  console.log('cart:', db);
   const [salesHistory, setSalesHistory] = useState([]);
 	const [saleItems, setSaleItems] = useState([]);
 	const [inventory, setInventory] = useState([]);
@@ -124,7 +123,11 @@ export default function App() {
       }
 
       try {
-        const allProducts = await db.inventory.toArray();
+        const { data: allProducts, error } = await db
+					.from("inventory")
+					.select("*");
+
+				if (error) console.error(error);
         const searchTerm = manualBarcode.toLowerCase().trim();
         
         const results = allProducts
@@ -180,17 +183,21 @@ export default function App() {
     setNotFoundCode('');
     setShowSuggestions(false);
     try {
-      let item = await db.inventory.where('barcode').equals(input).first();
+      const { data: item } = await db
+				.from("inventory")
+				.select("*")
+				.eq("barcode", input)
+				.single();
       
       if (!item) {
-        item = await db.inventory
+        item = await db.from('inventory')
           .where('name')
           .startsWithIgnoreCase(input)
           .first();
       }
       
       if (!item) {
-        const allItems = await db.inventory.toArray();
+        const allItems = await db.from('inventory').toArray();
         item = allItems.find(i => 
           i.name.toLowerCase().includes(input.toLowerCase())
         );
@@ -316,16 +323,22 @@ export default function App() {
     }
 
     try {
-      await db.transaction('rw', [db.inventory, db.sales, db.saleItems], async () => {
-        const saleId = await db.sales.add({
-          timestamp: new Date().getTime(),
-          total: totalAmount,
-          cashReceived: Number(cashReceived),
-          changeDue: changeDue
-        });
+      await db.transaction('rw', [db.from('inventory'), db.from('sales'), db.from('sale_items')], async () => {
+        const { data: sale, error } = await db
+          .from("sales")
+          .insert({
+            total: totalAmount,
+            cash_received: Number(cashReceived),
+            change_due: changeDue,
+            timestamp: Date.now(),
+          })
+          .select()
+          .single();
+
+        const saleId = sale.id;
 
         for (const item of cart) {
-          await db.saleItems.add({
+          await db.from('sale_items').add({
             saleId,
             productId: item.id,
             productName: item.name,
@@ -333,8 +346,8 @@ export default function App() {
             price: item.sellingPrice,
             subtotal: item.sellingPrice * item.quantity
           });
-          const dbItem = await db.inventory.get(item.id);
-          await db.inventory.update(item.id, { stock: Math.max(0, (dbItem?.stock || 0) - item.quantity) });
+          const dbItem = await db.from('inventory').get(item.id);
+          await db.from('inventory').update(item.id, { stock: Math.max(0, (dbItem?.stock || 0) - item.quantity) });
         }
       });
 
@@ -382,9 +395,9 @@ export default function App() {
 
     if (result.isConfirmed) {
       try {
-        const inventory = await db.inventory.toArray();
-        const sales = await db.sales.toArray();
-        const saleItems = await db.saleItems.toArray();
+        const inventory = await db.from('inventory').toArray();
+        const sales = await db.from('sales').toArray();
+        const saleItems = await db.from('sale_items').toArray();
         const creditLogs = await db.creditLog.toArray();
         
         const backupData = JSON.stringify({ inventory, sales, saleItems, creditLogs }, null, 2);
