@@ -46,16 +46,6 @@ export default function InventoryPanel({ initialBarcode }) {
 		e.preventDefault();
 		if (!name || !selling_price)
 			return alert("⚠️ Product Name and Selling Price are required.");
-
-		const productPayload = {
-			name,
-			barcode: barcode.trim() || null,
-			cost_price: Number(cost_price) || 0,
-			selling_price: Number(selling_price),
-			stock: Number(stock) || 0,
-			updated_at: new Date().toISOString(),
-		};
-
 		try {
 			if (editingId) {
 				const { error } = await db
@@ -98,8 +88,8 @@ export default function InventoryPanel({ initialBarcode }) {
 
 			await loadInventory();
 		} catch (error) {
-			console.error("Save product failed:", error);
-			alert("❌ Error: Barcode might already exist on another item.");
+			console.error(error);
+			alert(`❌ ${error.message}`);
 		}
 	};
 
@@ -457,10 +447,10 @@ export default function InventoryPanel({ initialBarcode }) {
 												</div>
 												<div className="text-right">
 													<p className="text-2xl font-bold text-green-600">
-														₱{item.selling_price.toFixed(2)}
+														₱{Number(item.selling_price || 0).toFixed(2)}
 													</p>
 													<p className="text-xs text-gray-400 line-through">
-														Cost: ₱{item.cost_price?.toFixed(2) || "0.00"}
+														Cost: ₱{Number(item.cost_price || 0).toFixed(2)}
 													</p>
 												</div>
 											</div>
