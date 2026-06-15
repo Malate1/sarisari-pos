@@ -8,6 +8,7 @@ import CreditPanel from './CreditPanel';
 import ReportsPanel from './ReportsPanel';
 import { db } from './db';
 
+
 export default function App() {
   const [showScanner, setShowScanner] = useState(false);
   const [showInventory, setShowInventory] = useState(false);
