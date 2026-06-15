@@ -349,7 +349,9 @@ export default function App() {
 
 		if (Number(cashReceived) < totalAmount) {
 			toast.error(
-				`⚠️ Insufficient payment. Need ₱${(totalAmount - Number(cashReceived)).toFixed(2)} more.`,
+				`⚠️ Insufficient payment. Need ₱${(
+					totalAmount - Number(cashReceived)
+				).toFixed(2)} more.`,
 				{
 					duration: 3000,
 					position: "top-right",
@@ -359,58 +361,64 @@ export default function App() {
 		}
 
 		try {
-			await db.transaction(
-				"rw",
-				[db.from("inventory"), db.from("sales"), db.from("sale_items")],
-				async () => {
-					const { data: sale, error } = await db
-						.from("sales")
-						.insert({
-							total: totalAmount,
-							cash_received: Number(cashReceived),
-							change_due: changeDue,
-							timestamp: Date.now(),
-						})
-						.select()
-						.single();
+			// Create Sale Record
+			const { data: sale, error: saleError } = await db
+				.from("sales")
+				.insert({
+					total: totalAmount,
+					cash_received: Number(cashReceived),
+					change_due: changeDue,
+					timestamp: new Date().toISOString(),
+				})
+				.select()
+				.single();
 
-					if (error) throw error;
+			if (saleError) throw saleError;
 
-					for (const item of cart) {
-						await db.from("sale_items").insert({
-							sale_id: sale.id,
-							product_id: item.id,
-							product_name: item.name,
-							quantity: item.quantity,
-							price: item.selling_price,
-							subtotal: item.selling_price * item.quantity,
-						});
+			// Save Sale Items and Update Inventory
+			for (const item of cart) {
+				const { error: itemError } = await db.from("sale_items").insert({
+					sale_id: sale.id,
+					product_id: item.id,
+					product_name: item.name,
+					quantity: item.quantity,
+					price: item.selling_price,
+					subtotal: item.selling_price * item.quantity,
+				});
 
-						const { data: dbItem } = await db
-							.from("inventory")
-							.select("stock")
-							.eq("id", item.id)
-							.single();
+				if (itemError) throw itemError;
 
-						await db
-							.from("inventory")
-							.update({
-								stock: Math.max(0, dbItem.stock - item.quantity),
-							})
-							.eq("id", item.id);
-					}
-				},
-			);
+				const { data: dbItem, error: inventoryError } = await db
+					.from("inventory")
+					.select("stock")
+					.eq("id", item.id)
+					.single();
+
+				if (inventoryError) throw inventoryError;
+
+				if (!dbItem) {
+					throw new Error(`Inventory item with ID ${item.id} not found.`);
+				}
+
+				const { error: updateError } = await db
+					.from("inventory")
+					.update({
+						stock: Math.max(0, Number(dbItem.stock) - Number(item.quantity)),
+					})
+					.eq("id", item.id);
+
+				if (updateError) throw updateError;
+			}
 
 			await Swal.fire({
 				title: "🎉 Sale Complete!",
 				html: `
-          <div class="text-left">
-            <p><strong>Total Amount:</strong> ₱${totalAmount.toFixed(2)}</p>
-            <p><strong>Cash Tendered:</strong> ₱${Number(cashReceived).toFixed(2)}</p>
-            <p><strong>Change Due:</strong> ₱${changeDue.toFixed(2)}</p>
-          </div>
-        `,
+				<div class="text-left">
+					<p><strong>Total Amount:</strong> ₱${totalAmount.toFixed(2)}</p>
+					<p><strong>Cash Tendered:</strong> ₱${Number(cashReceived).toFixed(2)}</p>
+					<p><strong>Change Due:</strong> ₱${changeDue.toFixed(2)}</p>
+				</div>
+			`,
 				icon: "success",
 				confirmButtonColor: "#10b981",
 				confirmButtonText: "Done",
@@ -418,13 +426,23 @@ export default function App() {
 				timerProgressBar: true,
 			});
 
+			// Refresh all data
+			await loadData();
+
+			// Clear cart
 			setCart([]);
 			setCashReceived("");
+
+			toast.success("Transaction completed successfully!", {
+				duration: 2000,
+				position: "top-right",
+			});
 		} catch (err) {
 			console.error("Checkout error:", err);
+
 			Swal.fire({
-				title: "Error!",
-				text: "Transaction failed. Please try again.",
+				title: "Transaction Failed",
+				text: err.message || "Please try again.",
 				icon: "error",
 				confirmButtonColor: "#ef4444",
 				confirmButtonText: "OK",
@@ -920,7 +938,9 @@ export default function App() {
 														<div className="text-right">
 															<p className="font-bold text-gray-800 text-lg">
 																₱
-																{(item.selling_price * item.quantity).toFixed(2)}
+																{(item.selling_price * item.quantity).toFixed(
+																	2,
+																)}
 															</p>
 														</div>
 													</div>
