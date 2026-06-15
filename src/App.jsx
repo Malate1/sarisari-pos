@@ -1,6 +1,5 @@
 // src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
 import Swal from 'sweetalert2';
 import toast, { Toaster } from 'react-hot-toast';
 import Scanner from './Scanner';
@@ -26,6 +25,7 @@ export default function App() {
   const [cart, setCart] = useState([]);
   const [cashReceived, setCashReceived] = useState('');
 
+  console.log('cart:', db);
   const salesHistory = useLiveQuery(() => db.sales.orderBy('id').reverse().toArray()) || [];
   const saleItems = useLiveQuery(() => db.saleItems.toArray()) || [];
   const inventory = useLiveQuery(() => db.inventory.toArray()) || [];
@@ -456,7 +456,7 @@ export default function App() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Sari-Sari POS1
+                  Sari-Sari POS
                 </h1>
                 <p className="text-xs text-gray-500 font-medium">Offline Store Manager v1.0</p>
               </div>
