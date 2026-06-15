@@ -186,7 +186,7 @@ export default function CreditPanel({ onClose }) {
 						id: product.id,
 						name: product.name,
 						barcode: product.barcode,
-						sellingPrice: product.sellingPrice,
+						selling_price: product.selling_price,
 						stock: product.stock,
 						quantity: 1,
 					},
@@ -223,7 +223,7 @@ export default function CreditPanel({ onClose }) {
 	};
 
 	const totalAmount = cart.reduce(
-		(sum, item) => sum + item.sellingPrice * item.quantity,
+		(sum, item) => sum + item.selling_price * item.quantity,
 		0,
 	);
 
@@ -272,8 +272,8 @@ export default function CreditPanel({ onClose }) {
 							id: item.id,
 							name: item.name,
 							quantity: item.quantity,
-							price: item.sellingPrice,
-							subtotal: item.sellingPrice * item.quantity,
+							price: item.selling_price,
+							subtotal: item.selling_price * item.quantity,
 						})),
 						dueDate: dueDate || null,
 						notes: notes || null,
@@ -733,7 +733,7 @@ export default function CreditPanel({ onClose }) {
 																		<div className="text-right flex-shrink-0 ml-3">
 																			<p
 																				className={`font-bold text-lg ${index === selectedSuggestionIndex ? "text-white" : "text-green-600"}`}>
-																				₱{product.sellingPrice.toFixed(2)}
+																				₱{product.selling_price.toFixed(2)}
 																			</p>
 																		</div>
 																	</div>
@@ -798,7 +798,7 @@ export default function CreditPanel({ onClose }) {
 																</h4>
 																<div className="flex gap-2 mt-1">
 																	<p className="text-xs text-gray-500">
-																		₱{item.sellingPrice.toFixed(2)} each
+																		₱{item.selling_price.toFixed(2)} each
 																	</p>
 																	{item.barcode && (
 																		<p className="text-xs text-gray-400 font-mono">
@@ -861,7 +861,7 @@ export default function CreditPanel({ onClose }) {
 															</div>
 															<p className="font-bold text-gray-800 text-lg">
 																₱
-																{(item.sellingPrice * item.quantity).toFixed(2)}
+																{(item.selling_price * item.quantity).toFixed(2)}
 															</p>
 														</div>
 													</div>
