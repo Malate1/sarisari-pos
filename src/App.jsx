@@ -498,7 +498,7 @@ export default function App() {
 	};
 
 	const viewSaleDetails = (sale) => {
-		const items = saleItems.filter((item) => item.saleId === sale.id);
+		const items = saleItems.filter((item) => item.sale_id === sale.id);
 		setSelectedSale({ ...sale, items });
 		setShowSaleDetails(true);
 	};
@@ -794,11 +794,14 @@ export default function App() {
 													</div>
 													<div>
 														<p className="text-xs text-gray-500 font-medium">
-															{new Date(sale.created_at).toLocaleTimeString([], {
-																hour: "2-digit",
-																minute: "2-digit",
-																hour12: true,
-															})}
+															{new Date(sale.created_at).toLocaleTimeString(
+																[],
+																{
+																	hour: "2-digit",
+																	minute: "2-digit",
+																	hour12: true,
+																},
+															)}
 														</p>
 														<p className="text-[10px] text-gray-400">
 															Sale #{sale.id}
@@ -1066,7 +1069,7 @@ export default function App() {
 									<div>
 										<p className="text-xs text-gray-500">Date & Time</p>
 										<p className="text-sm font-semibold text-gray-800">
-											{new Date(selectedSale.timestamp).toLocaleString()}
+											{new Date(selectedSale.created_at).toLocaleString()}
 										</p>
 									</div>
 									<div>
@@ -1078,13 +1081,13 @@ export default function App() {
 									<div>
 										<p className="text-xs text-gray-500">Cash Tendered</p>
 										<p className="text-sm font-semibold text-gray-800">
-											₱{selectedSale.cashReceived?.toFixed(2) || "0.00"}
+											₱{selectedSale.cash_received?.toFixed(2) || "0.00"}
 										</p>
 									</div>
 									<div>
 										<p className="text-xs text-gray-500">Change Due</p>
 										<p className="text-sm font-semibold text-blue-600">
-											₱{selectedSale.changeDue?.toFixed(2) || "0.00"}
+											₱{selectedSale.change_due?.toFixed(2) || "0.00"}
 										</p>
 									</div>
 								</div>
