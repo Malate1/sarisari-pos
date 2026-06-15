@@ -267,7 +267,7 @@ export default function CreditPanel({ onClose }) {
 					{
 						customerName: customerName.trim(),
 						customerPhone: customerPhone.trim() || null,
-						amount: totalAmount,
+						paidAmount: totalAmount,
 						items: cart.map((item) => ({
 							id: item.id,
 							name: item.name,
