@@ -28,6 +28,7 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				if (onScanFailure) onScanFailure("Camera permission denied");
 			}
 		};
+    checkCameraPermission();
 		return () => {
 			if (scannerRef.current) {
 				scannerRef.current
