@@ -55,8 +55,7 @@ export default function InventoryPanel({ initialBarcode }) {
 						barcode: barcode.trim() || null,
 						cost_price: Number(cost_price) || 0,
 						selling_price: Number(selling_price),
-						stock: Number(stock) || 0,
-						updated_at: new Date().toISOString(),
+						stock: Number(stock) || 0
 					})
 					.eq("id", editingId);
 
@@ -71,8 +70,7 @@ export default function InventoryPanel({ initialBarcode }) {
 					cost_price: Number(cost_price) || 0,
 					selling_price: Number(selling_price),
 					stock: Number(stock) || 0,
-					created_at: new Date().toISOString(),
-					updated_at: new Date().toISOString(),
+					created_at: new Date().toISOString()
 				});
 
 				if (error) throw error;
