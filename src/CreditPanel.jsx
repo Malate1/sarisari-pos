@@ -279,7 +279,7 @@ export default function CreditPanel({ onClose }) {
 						notes: notes || null,
 						status: "unpaid",
 						paidAmount: 0,
-						createdAt: new Date().toISOString(),
+						created_at: new Date().toISOString(),
 						updatedAt: new Date().toISOString(),
 					},
 				])
@@ -1056,7 +1056,7 @@ export default function CreditPanel({ onClose }) {
 											)}
 
 											<div className="mt-2 text-xs text-gray-400">
-												{new Date(credit.createdAt).toLocaleString()}
+												{new Date(credit.created_at).toLocaleString()}
 											</div>
 										</div>
 									);
