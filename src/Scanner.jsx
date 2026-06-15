@@ -50,7 +50,21 @@ const initializeScanner = async () => {
 				playSuccessFeedback();
 				onScanSuccess?.(decodedText, decodedResult);
 
-				setTimeout(() => onClose?.(), 500);
+				if (scannerRef.current) {
+					scannerRef.current
+						.clear()
+						.then(() => {
+							setIsCameraActive(false);
+							setTimeout(() => {
+								onClose?.();
+							}, 200);
+						})
+						.catch(() => {
+							onClose?.();
+						});
+				} else {
+					onClose?.();
+				}
 			},
 			(errorMessage) => {
 				if (errorMessage.includes("No MultiFormat Readers")) {
