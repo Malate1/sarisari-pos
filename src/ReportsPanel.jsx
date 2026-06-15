@@ -282,7 +282,7 @@ export default function ReportsPanel({ onClose }) {
 
 	// Credit statistics
 	const totalCreditAmount = creditLogs.reduce(
-		(sum, credit) => sum + (credit.paidAmount || 0),
+		(sum, credit) => sum + (credit.amount || 0),
 		0,
 	);
 	const totalPaidAmount = creditLogs.reduce(
