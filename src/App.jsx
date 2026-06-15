@@ -1095,7 +1095,7 @@ export default function App() {
 							<div className="space-y-2">
 								{selectedSale.items.map((item, idx) => {
 									const product = inventory.find(
-										(p) => p.id === item.productId,
+										(p) => p.id === item.product_id,
 									);
 									return (
 										<div
@@ -1104,7 +1104,7 @@ export default function App() {
 											<div className="flex justify-between items-start mb-2">
 												<div>
 													<p className="font-semibold text-gray-800">
-														{item.productName || product?.name}
+														{item.product_name || product?.name}
 													</p>
 													<p className="text-xs text-gray-500">
 														₱
