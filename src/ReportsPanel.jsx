@@ -145,7 +145,7 @@ export default function ReportsPanel({ onClose }) {
 						estimatedCost: suggestedQuantity * (product.cost_price || 0),
 						priority: priority,
 						urgencyMessage: urgencyMessage,
-						selling_priceupdate: product.selling_priceupdate,
+						selling_price: product.selling_price,
 						cost_price: product.cost_price,
 					});
 				}
@@ -163,7 +163,7 @@ export default function ReportsPanel({ onClose }) {
 					priority: "unknown",
 					urgencyMessage:
 						"❓ OUT OF STOCK - No recent sales data, consider ordering minimum quantity",
-					selling_priceupdate: product.selling_priceupdate,
+					selling_price: product.selling_price,
 					cost_price: product.cost_price,
 				});
 			}
@@ -275,7 +275,7 @@ export default function ReportsPanel({ onClose }) {
 		0,
 	);
 	const totalRetailValue = inventory.reduce(
-		(sum, item) => sum + (item.selling_priceupdate || 0) * (item.stock || 0),
+		(sum, item) => sum + (item.selling_price || 0) * (item.stock || 0),
 		0,
 	);
 	const potentialProfit = totalRetailValue - totalInventoryValue;
@@ -316,7 +316,7 @@ export default function ReportsPanel({ onClose }) {
 				"Product Name": item.name,
 				Barcode: item.barcode || "N/A",
 				"Cost Price": item.cost_price?.toFixed(2) || "0.00",
-				"Selling Price": item.selling_priceupdate?.toFixed(2) || "0.00",
+				"Selling Price": item.selling_price?.toFixed(2) || "0.00",
 				Stock: item.stock || 0,
 				"Total Value": ((item.cost_price || 0) * (item.stock || 0)).toFixed(2),
 			}));
