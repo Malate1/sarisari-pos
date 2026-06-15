@@ -28,8 +28,8 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [editingId, setEditingId] = useState(null);
 	const [name, setName] = useState("");
 	const [barcode, setBarcode] = useState(initialBarcode || "");
-	const [costPrice, setCostPrice] = useState("");
-	const [sellingPrice, setSellingPrice] = useState("");
+	const [cost_price, setCost_price] = useState("");
+	const [selling_price, setSelling_price] = useState("");
 	const [stock, setStock] = useState("");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
@@ -44,16 +44,16 @@ export default function InventoryPanel({ initialBarcode }) {
 	// Handle saving new products or updating existing items
 	const handleSaveProduct = async (e) => {
 		e.preventDefault();
-		if (!name || !sellingPrice)
+		if (!name || !selling_price)
 			return alert("⚠️ Product Name and Selling Price are required.");
 
 		const productPayload = {
 			name,
 			barcode: barcode.trim() || null,
-			costPrice: Number(costPrice) || 0,
-			sellingPrice: Number(sellingPrice),
+			cost_price: Number(cost_price) || 0,
+			selling_price: Number(selling_price),
 			stock: Number(stock) || 0,
-			updatedAt: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
 		};
 
 		try {
@@ -63,8 +63,8 @@ export default function InventoryPanel({ initialBarcode }) {
 					.update({
 						name,
 						barcode: barcode.trim() || null,
-						cost_price: Number(costPrice) || 0,
-						selling_price: Number(sellingPrice),
+						cost_price: Number(cost_price) || 0,
+						selling_price: Number(selling_price),
 						stock: Number(stock) || 0,
 						updated_at: new Date().toISOString(),
 					})
@@ -78,8 +78,8 @@ export default function InventoryPanel({ initialBarcode }) {
 				const { error } = await db.from("inventory").insert({
 					name,
 					barcode: barcode.trim() || null,
-					cost_price: Number(costPrice) || 0,
-					selling_price: Number(sellingPrice),
+					cost_price: Number(cost_price) || 0,
+					selling_price: Number(selling_price),
 					stock: Number(stock) || 0,
 					created_at: new Date().toISOString(),
 					updated_at: new Date().toISOString(),
@@ -92,8 +92,8 @@ export default function InventoryPanel({ initialBarcode }) {
 
 			setName("");
 			setBarcode("");
-			setCostPrice("");
-			setSellingPrice("");
+			setCost_price("");
+			setSelling_price("");
 			setStock("");
 
 			await loadInventory();
@@ -108,8 +108,8 @@ export default function InventoryPanel({ initialBarcode }) {
 		setEditingId(item.id);
 		setName(item.name);
 		setBarcode(item.barcode || "");
-		setCostPrice(item.cost_price);
-		setSellingPrice(item.selling_price);
+		setCost_price(item.cost_price);
+		setSelling_price(item.selling_price);
 		setStock(item.stock);
 		// Smooth scroll to form
 		document
@@ -287,8 +287,8 @@ export default function InventoryPanel({ initialBarcode }) {
 										<input
 											type="number"
 											step="0.01"
-											value={costPrice}
-											onChange={(e) => setCostPrice(e.target.value)}
+											value={cost_price}
+											onChange={(e) => setCost_price(e.target.value)}
 											placeholder="0.00"
 											className="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none transition-all duration-200 text-sm"
 										/>
@@ -305,8 +305,8 @@ export default function InventoryPanel({ initialBarcode }) {
 										<input
 											type="number"
 											step="0.01"
-											value={sellingPrice}
-											onChange={(e) => setSellingPrice(e.target.value)}
+											value={selling_price}
+											onChange={(e) => setSelling_price(e.target.value)}
 											placeholder="0.00"
 											className="w-full pl-8 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none transition-all duration-200 text-sm font-semibold"
 											required
@@ -345,8 +345,8 @@ export default function InventoryPanel({ initialBarcode }) {
 											setEditingId(null);
 											setName("");
 											setBarcode("");
-											setCostPrice("");
-											setSellingPrice("");
+											setCost_price("");
+											setSelling_price("");
 											setStock("");
 										}}
 										className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-300 transition-all duration-200">
