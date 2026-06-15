@@ -365,7 +365,9 @@ export default function App() {
 			const { data: sale, error: saleError } = await db
 				.from("sales")
 				.insert({
-					price_at_sale: totalAmount,
+					total: totalAmount,
+					cash_received: Number(cashReceived),
+					change_due: changeDue,
 					created_at: new Date().toISOString(),
 				})
 				.select()
