@@ -365,10 +365,8 @@ export default function App() {
 			const { data: sale, error: saleError } = await db
 				.from("sales")
 				.insert({
-					total: totalAmount,
-					cash_received: Number(cashReceived),
-					change_due: changeDue,
-					timestamp: new Date().toISOString(),
+					price_at_sale: totalAmount,
+					created_at: new Date().toISOString(),
 				})
 				.select()
 				.single();
