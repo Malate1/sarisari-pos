@@ -683,7 +683,7 @@ export default function App() {
 																	<div className="text-right flex-shrink-0 ml-3">
 																		<p
 																			className={`font-bold text-base ${index === selectedSuggestionIndex ? "text-white" : "text-green-600"}`}>
-																			₱{product.sellingPrice.toFixed(2)}
+																			₱{product.selling_price.toFixed(2)}
 																		</p>
 																		<p
 																			className={`text-xs ${index === selectedSuggestionIndex ? "text-white/80" : "text-gray-500"}`}>
@@ -1090,7 +1090,7 @@ export default function App() {
 													<p className="text-xs text-gray-500">
 														₱
 														{item.price?.toFixed(2) ||
-															product?.sellingPrice?.toFixed(2)}{" "}
+															product?.selling_price?.toFixed(2)}{" "}
 														each
 													</p>
 												</div>
@@ -1099,7 +1099,7 @@ export default function App() {
 													{item.subtotal?.toFixed(2) ||
 														(
 															item.quantity *
-															(item.price || product?.sellingPrice)
+															(item.price || product?.selling_price)
 														).toFixed(2)}
 												</p>
 											</div>
