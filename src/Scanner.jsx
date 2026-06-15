@@ -28,78 +28,93 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				if (onScanFailure) onScanFailure("Camera permission denied");
 			}
 		};
+		return () => {
+			if (scannerRef.current) {
+				scannerRef.current
+					.clear()
+					.catch(() => {})
+					.finally(() => {
+						scannerRef.current = null;
+					});
+			}
 
-const initializeScanner = async () => {
-  try {
-    const devices = await Html5Qrcode.getCameras();
+			navigator.mediaDevices?.enumerateDevices?.().then(() => {});
+		};
+	}, [onScanSuccess, onScanFailure, onClose]);
 
-    if (!devices.length) {
-      setErrorMessage("No camera found");
-      return;
-    }
+	const initializeScanner = async () => {
+		try {
+			// prevent double init (IMPORTANT FIX)
+			if (scannerRef.current) return;
 
-    const el = document.getElementById("reader");
-    if (!el) return;
+			const el = document.getElementById("reader");
+			if (!el) return;
 
-    const scanner = new Html5Qrcode("reader");
-    scannerRef.current = scanner;
+			const devices = await Html5Qrcode.getCameras();
+			if (!devices?.length) {
+				setErrorMessage("No camera found");
+				return;
+			}
 
-    const config = {
-      fps: 60,
-      qrbox: { width: 280, height: 280 },
-    };
+			const scanner = new Html5Qrcode("reader");
+			scannerRef.current = scanner;
 
-    const handleSuccess = async (decodedText, decodedResult) => {
-      playSuccessFeedback();
-      onScanSuccess?.(decodedText, decodedResult);
+			const config = {
+				fps: 60,
+				qrbox: { width: 280, height: 280 },
+			};
 
-      try {
-        // 1. STOP CAMERA FIRST (IMPORTANT FIX)
-        if (scannerRef.current) {
-          await scannerRef.current.stop().catch(() => {});
-        }
+			const safeShutdown = async () => {
+				try {
+					if (!scannerRef.current) return;
 
-        // 2. CLEAR SCANNER
-        if (scannerRef.current) {
-          await scannerRef.current.clear().catch(() => {});
-          scannerRef.current = null;
-        }
+					// HARD STOP FIRST (prevents white screen)
+					try {
+						await scannerRef.current.stop();
+					} catch {}
 
-        // 3. UI STATE UPDATE AFTER CAMERA IS OFF
-        setIsCameraActive(false);
+					// THEN CLEAR
+					try {
+						await scannerRef.current.clear();
+					} catch {}
 
-        // 4. CLOSE AFTER DOM SETTLES
-        setTimeout(() => {
-          onClose?.();
-        }, 150);
+					scannerRef.current = null;
+					setIsCameraActive(false);
 
-      } catch (err) {
-        console.error("Scanner shutdown error:", err);
-        onClose?.();
-      }
-    };
+					setTimeout(() => onClose?.(), 120);
+				} catch (err) {
+					console.error("Shutdown error:", err);
+					onClose?.();
+				}
+			};
 
-    await scanner.start(
-      { facingMode: "environment" }, // back camera
-      config,
-      handleSuccess,
-      (errorMessage) => {
-        if (errorMessage?.includes("No MultiFormat Readers")) {
-          setErrorMessage("Position barcode clearly in frame");
-        }
-        onScanFailure?.(errorMessage);
-      }
-    );
+			const handleSuccess = async (decodedText, decodedResult) => {
+				playSuccessFeedback();
+				onScanSuccess?.(decodedText, decodedResult);
 
-    setIsCameraActive(true);
-    setIsScannerReady(true);
-    setErrorMessage("");
+				await safeShutdown();
+			};
 
-  } catch (err) {
-    console.error(err);
-    setErrorMessage("Failed to initialize scanner");
-  }
-};
+			await scanner.start(
+				{ facingMode: "environment" },
+				config,
+				handleSuccess,
+				(errorMessage) => {
+					if (errorMessage?.includes("No MultiFormat Readers")) {
+						setErrorMessage("Position barcode clearly in frame");
+					}
+					onScanFailure?.(errorMessage);
+				},
+			);
+
+			setIsCameraActive(true);
+			setIsScannerReady(true);
+			setErrorMessage("");
+		} catch (err) {
+			console.error(err);
+			setErrorMessage("Failed to initialize scanner");
+		}
+	};
 	const playSuccessFeedback = () => {
 		// Play a subtle beep sound (optional)
 		try {
