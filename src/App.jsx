@@ -380,7 +380,6 @@ export default function App() {
 				const { error: itemError } = await db.from("sale_items").insert({
 					sale_id: sale.id,
 					product_id: item.id,
-					product_name: item.name,
 					quantity: item.quantity,
 					price: item.selling_price,
 					subtotal: item.selling_price * item.quantity,
