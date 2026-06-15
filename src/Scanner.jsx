@@ -29,83 +29,77 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 			}
 		};
 
-		const initializeScanner = async () => {
-			try {
-				const devices = await Html5Qrcode.getCameras();
+const initializeScanner = async () => {
+  try {
+    const devices = await Html5Qrcode.getCameras();
 
-        const el = document.getElementById("reader");
-				if (!el) return;
+    if (!devices.length) {
+      setErrorMessage("No camera found");
+      return;
+    }
 
+    const el = document.getElementById("reader");
+    if (!el) return;
 
-				if (!devices.length) {
-					setErrorMessage("No camera found");
-					return;
-				}
+    const scanner = new Html5Qrcode("reader");
+    scannerRef.current = scanner;
 
-				const scanner = new Html5Qrcode("reader");
-				scannerRef.current = scanner;
+    const config = {
+      fps: 60,
+      qrbox: { width: 280, height: 280 },
+    };
 
-				const config = {
-					fps: 60,
-					qrbox: { width: 280, height: 280 },
-				};
+    const handleSuccess = async (decodedText, decodedResult) => {
+      playSuccessFeedback();
+      onScanSuccess?.(decodedText, decodedResult);
 
-				await scanner.start(
-					{ facingMode: "environment" }, // ✅ GUARANTEED BACK CAMERA
-					config,
-					(decodedText, decodedResult) => {
-						playSuccessFeedback();
-						onScanSuccess?.(decodedText, decodedResult);
+      try {
+        // 1. STOP CAMERA FIRST (IMPORTANT FIX)
+        if (scannerRef.current) {
+          await scannerRef.current.stop().catch(() => {});
+        }
 
-						if (!scannerRef.current) return;
+        // 2. CLEAR SCANNER
+        if (scannerRef.current) {
+          await scannerRef.current.clear().catch(() => {});
+          scannerRef.current = null;
+        }
 
-						scannerRef.current
-							.clear()
-							.then(() => {
-								scannerRef.current = null;
-								setIsCameraActive(false);
+        // 3. UI STATE UPDATE AFTER CAMERA IS OFF
+        setIsCameraActive(false);
 
-								requestAnimationFrame(() => {
-									setTimeout(() => onClose?.(), 100);
-								});
-							})
-							.catch(() => {
-								onClose?.();
-							});
-					},
-					(errorMessage) => {
-						if (errorMessage.includes("No MultiFormat Readers")) {
-							setErrorMessage("Position barcode clearly in frame");
-						}
-						onScanFailure?.(errorMessage);
-					},
-				);
+        // 4. CLOSE AFTER DOM SETTLES
+        setTimeout(() => {
+          onClose?.();
+        }, 150);
 
-				setIsCameraActive(true);
-				setIsScannerReady(true);
-				setErrorMessage("");
-			} catch (err) {
-				console.error(err);
-				setErrorMessage("Failed to initialize scanner");
-			}
-		};
-		checkCameraPermission();
+      } catch (err) {
+        console.error("Scanner shutdown error:", err);
+        onClose?.();
+      }
+    };
 
-		return () => {
-			if (scannerRef.current) {
-				scannerRef.current
-					.clear()
-					.catch(() => {})
-					.finally(() => {
-						scannerRef.current = null;
-					});
-			}
+    await scanner.start(
+      { facingMode: "environment" }, // back camera
+      config,
+      handleSuccess,
+      (errorMessage) => {
+        if (errorMessage?.includes("No MultiFormat Readers")) {
+          setErrorMessage("Position barcode clearly in frame");
+        }
+        onScanFailure?.(errorMessage);
+      }
+    );
 
-			navigator.mediaDevices?.enumerateDevices?.().then(() => {
-			});
-		};
-	}, [onScanSuccess, onScanFailure, onClose]);
+    setIsCameraActive(true);
+    setIsScannerReady(true);
+    setErrorMessage("");
 
+  } catch (err) {
+    console.error(err);
+    setErrorMessage("Failed to initialize scanner");
+  }
+};
 	const playSuccessFeedback = () => {
 		// Play a subtle beep sound (optional)
 		try {
