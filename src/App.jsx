@@ -34,9 +34,9 @@ export default function App() {
 	const loadData = async () => {
 		try {
 			const [salesRes, itemsRes, inventoryRes] = await Promise.all([
-				api.get("/sales"),
-				api.get("/sale-items"),
-				api.get("/inventory"),
+				db.get("/sales"),
+				db.get("/sale-items"),
+				db.get("/inventory"),
 			]);
 
 			setSalesHistory(salesRes.data);
