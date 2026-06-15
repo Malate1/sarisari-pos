@@ -32,7 +32,7 @@ export default function ReportsPanel({ onClose }) {
 
 			const [salesRes, saleItemsRes, inventoryRes, creditRes] =
 				await Promise.all([
-					db.from("sales").select("*").order("timestamp", { ascending: false }),
+					db.from("sales").select("*").order("created_at", { ascending: false }),
 
 					db.from("sale_items").select("*"),
 
@@ -61,7 +61,7 @@ export default function ReportsPanel({ onClose }) {
 	const calculateDailySalesAverage = () => {
 		const dailySalesMap = {};
 		const last30DaysSales = sales.filter((sale) => {
-			const saleDate = new Date(sale.timestamp);
+			const saleDate = new Date(sale.created_at);
 			const thirtyDaysAgo = new Date();
 			thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 			return saleDate >= thirtyDaysAgo;
@@ -70,7 +70,7 @@ export default function ReportsPanel({ onClose }) {
 		// Count unique days with sales
 		const uniqueDays = new Set();
 		last30DaysSales.forEach((sale) => {
-			const date = new Date(sale.timestamp).toISOString().split("T")[0];
+			const date = new Date(sale.created_at).toISOString().split("T")[0];
 			uniqueDays.add(date);
 		});
 		const numberOfDays = Math.max(uniqueDays.size, 1);
@@ -197,21 +197,21 @@ export default function ReportsPanel({ onClose }) {
 			const today = new Date().toISOString().split("T")[0];
 			filtered = sales.filter(
 				(sale) =>
-					new Date(sale.timestamp).toISOString().split("T")[0] === today,
+					new Date(sale.created_at).toISOString().split("T")[0] === today,
 			);
 		} else if (dateRange === "week") {
 			const weekAgo = new Date();
 			weekAgo.setDate(weekAgo.getDate() - 7);
-			filtered = sales.filter((sale) => sale.timestamp >= weekAgo.getTime());
+			filtered = sales.filter((sale) => sale.created_at >= weekAgo.getTime());
 		} else if (dateRange === "month") {
 			const monthAgo = new Date();
 			monthAgo.setMonth(monthAgo.getMonth() - 1);
-			filtered = sales.filter((sale) => sale.timestamp >= monthAgo.getTime());
+			filtered = sales.filter((sale) => sale.created_at >= monthAgo.getTime());
 		} else if (dateRange === "custom" && startDate && endDate) {
 			const start = new Date(startDate).setHours(0, 0, 0, 0);
 			const end = new Date(endDate).setHours(23, 59, 59, 999);
 			filtered = sales.filter(
-				(sale) => sale.timestamp >= start && sale.timestamp <= end,
+				(sale) => sale.created_at >= start && sale.created_at <= end,
 			);
 		}
 
@@ -257,7 +257,7 @@ export default function ReportsPanel({ onClose }) {
 	// Daily sales data
 	const dailySales = {};
 	filteredSales.forEach((sale) => {
-		const date = new Date(sale.timestamp).toISOString().split("T")[0];
+		const date = new Date(sale.created_at).toISOString().split("T")[0];
 		if (!dailySales[date]) {
 			dailySales[date] = { total: 0, count: 0 };
 		}
@@ -304,7 +304,7 @@ export default function ReportsPanel({ onClose }) {
 
 		if (type === "sales") {
 			data = filteredSales.map((sale) => ({
-				Date: new Date(sale.timestamp).toLocaleString(),
+				Date: new Date(sale.created_at).toLocaleString(),
 				"Sale ID": sale.id,
 				Total: sale.total?.toFixed(2) || "0.00",
 				"Cash Received": sale.cashReceived?.toFixed(2) || "0.00",
@@ -958,7 +958,7 @@ export default function ReportsPanel({ onClose }) {
 														key={sale.id}
 														className="border-b border-gray-100">
 														<td className="py-2">
-															{new Date(sale.timestamp).toLocaleString()}
+															{new Date(sale.created_at).toLocaleString()}
 														</td>
 														<td className="py-2">#{sale.id}</td>
 														<td className="py-2 text-right font-semibold">
