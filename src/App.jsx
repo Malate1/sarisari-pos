@@ -794,7 +794,7 @@ export default function App() {
 													</div>
 													<div>
 														<p className="text-xs text-gray-500 font-medium">
-															{new Date(sale.timestamp).toLocaleTimeString([], {
+															{new Date(sale.created_at).toLocaleTimeString([], {
 																hour: "2-digit",
 																minute: "2-digit",
 																hour12: true,
