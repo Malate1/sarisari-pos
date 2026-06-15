@@ -458,7 +458,7 @@ export default function CreditPanel({ onClose }) {
 					status: newStatus,
 					updatedAt: new Date().toISOString(),
 					...(newStatus === "paid" && {
-						paidAt: new Date().toISOString(),
+						updated_at: new Date().toISOString(),
 					}),
 				})
 				.eq("id", credit.id);
