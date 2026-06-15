@@ -1,10 +1,9 @@
-// backend/db.js
-
 const mysql = require("mysql2/promise");
 
 const pool = mysql.createPool({
-	host: "https://mysql-33a8d8f5-malatemichael22-8bf7.e.aivencloud.com",
+	host: "mysql-33a8d8f5-malatemichael22-8bf7.e.aivencloud.com",
 	user: "avnadmin",
+  port: 19693,
 	password: "AVNS_VBteJC4_Dbdp8_quqra",
 	database: "defaultdb",
 	waitForConnections: true,
