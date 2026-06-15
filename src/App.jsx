@@ -27,9 +27,29 @@ export default function App() {
   const [cashReceived, setCashReceived] = useState('');
 
   console.log('cart:', db);
-  const salesHistory = useLiveQuery(() => db.sales.orderBy('id').reverse().toArray()) || [];
-  const saleItems = useLiveQuery(() => db.saleItems.toArray()) || [];
-  const inventory = useLiveQuery(() => db.inventory.toArray()) || [];
+  const [salesHistory, setSalesHistory] = useState([]);
+	const [saleItems, setSaleItems] = useState([]);
+	const [inventory, setInventory] = useState([]);
+
+	const loadData = async () => {
+		try {
+			const [salesRes, itemsRes, inventoryRes] = await Promise.all([
+				api.get("/sales"),
+				api.get("/sale-items"),
+				api.get("/inventory"),
+			]);
+
+			setSalesHistory(salesRes.data);
+			setSaleItems(itemsRes.data);
+			setInventory(inventoryRes.data);
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
+	useEffect(() => {
+		loadData();
+	}, []);
 
   // Inject CSS styles
   useEffect(() => {
