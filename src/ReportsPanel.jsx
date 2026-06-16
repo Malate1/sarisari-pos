@@ -75,7 +75,7 @@ export default function ReportsPanel({ onClose }) {
 			const [salesRes, inventoryRes, creditRes, saleItemsRes] = await Promise.all([
 				db.from("sales").select("*").order("created_at", { ascending: false }),
 				db.from("inventory").select("*"),
-				db.from("credit_logs").select("*").order("updated_at", { ascending: false }),
+				db.from("credit_logs").select("*"),
 				db.from("sale_items").select("*"),
 			]);
 
