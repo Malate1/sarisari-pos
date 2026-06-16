@@ -10,13 +10,7 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [inventoryList, setInventoryList] = useState([]);
 	const [showScanner, setShowScanner] = useState(false);
 
-	const [name, setName] = useState('');
-	const [sellingPrice, setSellingPrice] = useState('');
-	const [stock, setStock] = useState('');
-	const [description, setDescription] = useState('');
-	const [category, setCategory] = useState('');
-	const [product, setProduct] = useState(null);
-	const [isEditing, setIsEditing] = useState(false);
+	
 
 	useEffect(() => {
 		loadInventory();
@@ -40,26 +34,16 @@ export default function InventoryPanel({ initialBarcode }) {
 	try {
 		console.log('Processing barcode:', code);
 		
-		// Check if db is available
-		if (!db) {
-		console.error('Database connection not initialized');
-		toast.error('Database connection error', {
-			duration: 3000,
-			position: 'top-right',
-		});
-		return;
-		}
-		
+		// Query the database for the barcode
 		const { data, error } = await db
 		.from('inventory')
 		.select('*')
 		.eq('barcode', code);
 		
-		// Log the full response for debugging
-		console.log('Query response:', { data, error });
+		console.log('Query result:', { data, error });
 		
 		if (error) {
-		console.error('Supabase query error:', error);
+		console.error('Supabase error:', error);
 		toast.error(`Database error: ${error.message}`, {
 			duration: 3000,
 			position: 'top-right',
@@ -68,53 +52,68 @@ export default function InventoryPanel({ initialBarcode }) {
 		}
 		
 		if (data && data.length > 0) {
-		// Product found
+		// Product found - fill the form with existing data
 		const product = data[0];
 		console.log('Product found:', product);
 		
-		setProduct(product);
+		setEditingId(product.id);
 		setName(product.name);
-		setSellingPrice(product.selling_price);
-		setStock(product.stock);
+		setBarcode(product.barcode);
+		setCost_price(product.cost_price || '');
+		setSelling_price(product.selling_price || '');
+		setStock(product.stock || '');
 		
-		toast.success(`Product "${product.name}" found! 🎉`, {
+		toast.success(`Product "${product.name}" loaded! 🎉`, {
 			duration: 2000,
 			position: 'top-right',
 		});
 		} else {
-		// Product not found
+		// Product not found - offer to add it
 		console.log('Product not found for barcode:', code);
 		
 		const result = await Swal.fire({
-			title: 'Product Not Found',
-			text: `Barcode "${code}" is not registered. Would you like to add it?`,
+			title: '📦 New Product Detected',
+			html: `
+			<div class="text-left">
+				<p class="mb-2">Barcode <strong>${code}</strong> is not registered in inventory.</p>
+				<p class="text-sm text-gray-500">Would you like to add this product?</p>
+			</div>
+			`,
 			icon: 'info',
 			showCancelButton: true,
 			confirmButtonColor: '#3b82f6',
 			cancelButtonColor: '#6b7280',
-			confirmButtonText: 'Yes, Add Product',
-			cancelButtonText: 'No, Cancel',
+			confirmButtonText: '✅ Yes, Add Product',
+			cancelButtonText: '❌ No, Cancel',
 		});
 		
 		if (result.isConfirmed) {
+			// Pre-fill the barcode and clear other fields for new product
+			setEditingId(null);
 			setBarcode(code);
-			setIsEditing(false);
-			setProduct(null);
 			setName('');
-			setSellingPrice('');
+			setCost_price('');
+			setSelling_price('');
 			setStock('');
-			setDescription('');
-			setCategory('');
 			
-			toast.success('Ready to add new product!', {
+			// Focus on the name field
+			setTimeout(() => {
+			document.getElementById('product-name')?.focus();
+			}, 300);
+			
+			toast.success('Ready to add new product! Fill in the details below.', {
+			duration: 3000,
+			position: 'top-right',
+			});
+		} else {
+			toast.info('Product addition cancelled.', {
 			duration: 2000,
 			position: 'top-right',
 			});
 		}
 		}
 	} catch (error) {
-		// Catch any unexpected errors
-		console.error('Unexpected error in processInventoryBarcode:', error);
+		console.error('Error processing barcode:', error);
 		toast.error(`Error: ${error.message || 'Please try again'}`, {
 		duration: 3000,
 		position: 'top-right',
