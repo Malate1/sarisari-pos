@@ -28,7 +28,7 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				if (onScanFailure) onScanFailure("Camera permission denied");
 			}
 		};
-    checkCameraPermission();
+		checkCameraPermission();
 		return () => {
 			if (scannerRef.current) {
 				scannerRef.current
@@ -61,8 +61,14 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 			scannerRef.current = scanner;
 
 			const config = {
-				fps: 60,
+				fps: 10,
 				qrbox: { width: 280, height: 280 },
+				formatsToSupport: [
+					Html5QrcodeSupportedFormats.EAN_13,
+					Html5QrcodeSupportedFormats.EAN_8,
+					Html5QrcodeSupportedFormats.UPC_A,
+					Html5QrcodeSupportedFormats.UPC_E,
+				],
 			};
 
 			const safeShutdown = async () => {
@@ -89,9 +95,25 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				}
 			};
 
+			const lastBarcodeRef = useRef("");
+			const scanCountRef = useRef(0);
 			const handleSuccess = async (decodedText, decodedResult) => {
+				const barcode = decodedText.trim();
+
+				if (!/^\d{13}$/.test(barcode)) return;
+
+				if (lastBarcodeRef.current === barcode) {
+					scanCountRef.current++;
+				} else {
+					lastBarcodeRef.current = barcode;
+					scanCountRef.current = 1;
+				}
+
+				// Must be detected 3 times consecutively
+				if (scanCountRef.current < 1) return;
+
 				playSuccessFeedback();
-				onScanSuccess?.(decodedText, decodedResult);
+				onScanSuccess?.(barcode, decodedResult);
 
 				await safeShutdown();
 			};
@@ -107,7 +129,6 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 					onScanFailure?.(errorMessage);
 				},
 			);
-
 			setIsCameraActive(true);
 			setIsScannerReady(true);
 			setErrorMessage("");
