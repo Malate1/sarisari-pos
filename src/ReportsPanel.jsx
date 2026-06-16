@@ -308,7 +308,7 @@ export default function ReportsPanel({ onClose }) {
 			if (reportType === "sales") {
 				headers = ["Date", "Sale ID", "Total", "Cash Received", "Change Due"];
 				rows = filteredSales.map((s) => [
-					new Date(s.updated_at).toLocaleString(),
+					new Date(s.created_at).toLocaleString(),
 					s.id,
 					(s.total || 0).toFixed(2),
 					(s.cash_received || 0).toFixed(2),
