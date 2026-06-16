@@ -73,7 +73,7 @@ export default function ReportsPanel({ onClose }) {
 		try {
 			setLoading(true);
 			const [salesRes, inventoryRes, creditRes, saleItemsRes] = await Promise.all([
-				db.from("sales").select("*").order("updated_at", { ascending: false }),
+				db.from("sales").select("*").order("created_at", { ascending: false }),
 				db.from("inventory").select("*"),
 				db.from("credit_logs").select("*").order("updated_at", { ascending: false }),
 				db.from("sale_items").select("*"),
@@ -103,26 +103,26 @@ export default function ReportsPanel({ onClose }) {
 		if (dateRange === "today") {
 			const today = new Date().toISOString().split("T")[0];
 			filtered = filtered.filter(
-				(s) => s.updated_at && s.updated_at.split("T")[0] === today
+				(s) => s.created_at && s.created_at.split("T")[0] === today
 			);
 		} else if (dateRange === "week") {
 			const weekAgo = new Date();
 			weekAgo.setDate(weekAgo.getDate() - 7);
 			filtered = filtered.filter(
-				(s) => s.updated_at && new Date(s.updated_at) >= weekAgo
+				(s) => s.created_at && new Date(s.created_at) >= weekAgo
 			);
 		} else if (dateRange === "month") {
 			const monthAgo = new Date();
 			monthAgo.setMonth(monthAgo.getMonth() - 1);
 			filtered = filtered.filter(
-				(s) => s.updated_at && new Date(s.updated_at) >= monthAgo
+				(s) => s.created_at && new Date(s.created_at) >= monthAgo
 			);
 		} else if (dateRange === "custom" && startDate && endDate) {
 			filtered = filtered.filter(
 				(s) =>
-					s.updated_at &&
-					s.updated_at.split("T")[0] >= startDate &&
-					s.updated_at.split("T")[0] <= endDate
+					s.created_at &&
+					s.created_at.split("T")[0] >= startDate &&
+					s.created_at.split("T")[0] <= endDate
 			);
 		}
 
@@ -142,8 +142,8 @@ export default function ReportsPanel({ onClose }) {
 		// Calculate daily sales
 		const daily = {};
 		filtered.forEach((s) => {
-			if (s.updated_at) {
-				const date = s.updated_at.split("T")[0];
+			if (s.created_at) {
+				const date = s.created_at.split("T")[0];
 				if (!daily[date]) {
 					daily[date] = { total: 0, count: 0 };
 				}
@@ -216,8 +216,8 @@ export default function ReportsPanel({ onClose }) {
 					salesData.some(
 						(s) =>
 							s.id === item.sale_id &&
-							s.updated_at &&
-							new Date(s.updated_at) >= thirtyDaysAgo
+							s.created_at &&
+							new Date(s.created_at) >= thirtyDaysAgo
 					)
 			);
 
