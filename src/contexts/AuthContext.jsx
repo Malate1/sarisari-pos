@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
 <<<<<<< HEAD
-import { db } from '../db';
+import { db } from './db';
 =======
 // import { supabase } from '../lib/supabase';
 >>>>>>> 98f0669d9342d2a38f42c188566ce5eb6b003e26
