@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { AuthProvider } from './contexts/AuthContext';  // Change this line
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './ProtectedRoute';
 import App from './App';
 import './index.css';
 
