@@ -1,10 +1,6 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
-<<<<<<< HEAD
 import { db } from './db';
-=======
-// import { supabase } from '../lib/supabase';
->>>>>>> 98f0669d9342d2a38f42c188566ce5eb6b003e26
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext({});
@@ -25,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    db.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsAuthenticated(!!session);
@@ -33,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = db.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsAuthenticated(!!session);
@@ -45,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   const signIn = async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await db.auth.signInWithPassword({
         email,
         password,
       });
@@ -70,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password, fullName) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await db.auth.signUp({
         email,
         password,
         options: {
@@ -109,7 +105,7 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await db.auth.signOut();
       if (error) throw error;
       
       toast.success('Signed out successfully', {
