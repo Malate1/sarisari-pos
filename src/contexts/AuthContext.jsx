@@ -152,14 +152,15 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      localStorage.removeItem('pos_user');
-      setUser(null);
-      setIsAuthenticated(false);
-      
       toast.success('Signed out successfully', {
         duration: 2000,
         position: 'top-right',
       });
+      localStorage.removeItem('pos_user');
+      setUser(null);
+      setIsAuthenticated(false);
+      
+
     } catch (error) {
       console.error('Signout error:', error);
       toast.error('Failed to sign out', {
