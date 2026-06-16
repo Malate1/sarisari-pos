@@ -442,43 +442,76 @@ export default function ReportsPanel({ onClose }) {
 				</div>
 
 				{/* Tabs */}
-				<div className="flex border-b border-gray-200 px-6 overflow-x-auto">
-					<button
+				<div className="border-b border-gray-200 px-4 sm:px-6 overflow-x-auto">
+					<div className="flex gap-1 sm:gap-0 min-w-max sm:min-w-0">
+						<button
 						onClick={() => setActiveTab("sales")}
-						className={`px-4 py-3 font-semibold transition whitespace-nowrap ${
+						className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap relative ${
 							activeTab === "sales"
-								? "text-blue-600 border-b-2 border-blue-600"
-								: "text-gray-500 hover:text-gray-700"
+							? "text-blue-600"
+							: "text-gray-500 hover:text-gray-700"
 						}`}>
-						💰 Sales Report
-					</button>
-					<button
+						<span className="flex items-center gap-1.5 sm:gap-2">
+							<span className="text-base sm:text-lg">💰</span>
+							<span className="hidden xs:inline">Sales Report</span>
+							<span className="xs:hidden">Sales</span>
+						</span>
+						{activeTab === "sales" && (
+							<span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></span>
+						)}
+						</button>
+
+						<button
 						onClick={() => setActiveTab("reorder")}
-						className={`px-4 py-3 font-semibold transition whitespace-nowrap ${
+						className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap relative ${
 							activeTab === "reorder"
-								? "text-blue-600 border-b-2 border-blue-600"
-								: "text-gray-500 hover:text-gray-700"
+							? "text-blue-600"
+							: "text-gray-500 hover:text-gray-700"
 						}`}>
-						📋 Reorder Report
-					</button>
-					<button
+						<span className="flex items-center gap-1.5 sm:gap-2">
+							<span className="text-base sm:text-lg">📋</span>
+							<span className="hidden xs:inline">Reorder Report</span>
+							<span className="xs:hidden">Reorder</span>
+						</span>
+						{activeTab === "reorder" && (
+							<span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></span>
+						)}
+						</button>
+
+						<button
 						onClick={() => setActiveTab("inventory")}
-						className={`px-4 py-3 font-semibold transition whitespace-nowrap ${
+						className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap relative ${
 							activeTab === "inventory"
-								? "text-blue-600 border-b-2 border-blue-600"
-								: "text-gray-500 hover:text-gray-700"
+							? "text-blue-600"
+							: "text-gray-500 hover:text-gray-700"
 						}`}>
-						📦 Inventory Report
-					</button>
-					<button
+						<span className="flex items-center gap-1.5 sm:gap-2">
+							<span className="text-base sm:text-lg">📦</span>
+							<span className="hidden xs:inline">Inventory Report</span>
+							<span className="xs:hidden">Inventory</span>
+						</span>
+						{activeTab === "inventory" && (
+							<span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></span>
+						)}
+						</button>
+
+						<button
 						onClick={() => setActiveTab("credits")}
-						className={`px-4 py-3 font-semibold transition whitespace-nowrap ${
+						className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition whitespace-nowrap relative ${
 							activeTab === "credits"
-								? "text-blue-600 border-b-2 border-blue-600"
-								: "text-gray-500 hover:text-gray-700"
+							? "text-blue-600"
+							: "text-gray-500 hover:text-gray-700"
 						}`}>
-						📝 Credit Report
-					</button>
+						<span className="flex items-center gap-1.5 sm:gap-2">
+							<span className="text-base sm:text-lg">📝</span>
+							<span className="hidden xs:inline">Credit Report</span>
+							<span className="xs:hidden">Credits</span>
+						</span>
+						{activeTab === "credits" && (
+							<span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></span>
+						)}
+						</button>
+					</div>
 				</div>
 
 				{/* Content */}
