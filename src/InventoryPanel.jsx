@@ -10,6 +10,14 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [inventoryList, setInventoryList] = useState([]);
 	const [showScanner, setShowScanner] = useState(false);
 
+	const [name, setName] = useState('');
+	const [sellingPrice, setSellingPrice] = useState('');
+	const [stock, setStock] = useState('');
+	const [description, setDescription] = useState('');
+	const [category, setCategory] = useState('');
+	const [product, setProduct] = useState(null);
+	const [isEditing, setIsEditing] = useState(false);
+
 	useEffect(() => {
 		loadInventory();
 	}, []);
@@ -30,74 +38,96 @@ export default function InventoryPanel({ initialBarcode }) {
 
 	const processInventoryBarcode = async (code) => {
 	try {
+		console.log('Processing barcode:', code);
+		
+		// Check if db is available
+		if (!db) {
+		console.error('Database connection not initialized');
+		toast.error('Database connection error', {
+			duration: 3000,
+			position: 'top-right',
+		});
+		return;
+		}
+		
 		const { data, error } = await db
 		.from('inventory')
 		.select('*')
-		.eq('barcode', code)
-		.single();
+		.eq('barcode', code);
 		
-		if (error && error.code !== 'PGRST116') {
-		throw error;
+		// Log the full response for debugging
+		console.log('Query response:', { data, error });
+		
+		if (error) {
+		console.error('Supabase query error:', error);
+		toast.error(`Database error: ${error.message}`, {
+			duration: 3000,
+			position: 'top-right',
+		});
+		return;
 		}
 		
-		if (data) {
+		if (data && data.length > 0) {
 		// Product found
-		setProduct(data);
-		setName(data.name);
-		setSellingPrice(data.selling_price);
-		setStock(data.stock);
+		const product = data[0];
+		console.log('Product found:', product);
 		
-		toast.success(`Product "${data.name}" found! 🎉`, {
+		setProduct(product);
+		setName(product.name);
+		setSellingPrice(product.selling_price);
+		setStock(product.stock);
+		
+		toast.success(`Product "${product.name}" found! 🎉`, {
 			duration: 2000,
 			position: 'top-right',
 		});
 		} else {
-		// Product not found - simple suggestion
-		setBarcode(code); // Pre-fill barcode field
+		// Product not found
+		console.log('Product not found for barcode:', code);
 		
-		Swal.fire({
-			title: '📦 New Product Detected',
-			text: `Barcode "${code}" is not in inventory. Would you like to add this product?`,
+		const result = await Swal.fire({
+			title: 'Product Not Found',
+			text: `Barcode "${code}" is not registered. Would you like to add it?`,
 			icon: 'info',
 			showCancelButton: true,
 			confirmButtonColor: '#3b82f6',
 			cancelButtonColor: '#6b7280',
 			confirmButtonText: 'Yes, Add Product',
 			cancelButtonText: 'No, Cancel',
-		}).then((result) => {
-			if (result.isConfirmed) {
-			// Clear form and set to add mode
+		});
+		
+		if (result.isConfirmed) {
+			setBarcode(code);
 			setIsEditing(false);
 			setProduct(null);
 			setName('');
 			setSellingPrice('');
 			setStock('');
-			
-			// Focus on the form
-			document.getElementById('product-name')?.focus();
+			setDescription('');
+			setCategory('');
 			
 			toast.success('Ready to add new product!', {
-				duration: 2000,
-				position: 'top-right',
+			duration: 2000,
+			position: 'top-right',
 			});
-			}
-		});
+		}
 		}
 	} catch (error) {
-		console.error('Error processing barcode:', error);
-		toast.error('Error processing barcode. Please try again.', {
+		// Catch any unexpected errors
+		console.error('Unexpected error in processInventoryBarcode:', error);
+		toast.error(`Error: ${error.message || 'Please try again'}`, {
 		duration: 3000,
 		position: 'top-right',
 		});
 	}
 	};
-  
-  // Handle manual barcode entry
-  const handleBarcodeSubmit = (e) => {
-    if (e.key === 'Enter' && barcode.trim()) {
-      processInventoryBarcode(barcode.trim());
-    }
-  };
+	
+	// Handle manual barcode entry
+	const handleBarcodeSubmit = (e) => {
+		if (e.key === 'Enter' && barcode.trim()) {
+		processInventoryBarcode(barcode.trim());
+		}
+	};
 
 	// Form State Values
 	const [editingId, setEditingId] = useState(null);
