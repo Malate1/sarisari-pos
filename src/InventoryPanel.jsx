@@ -9,122 +9,135 @@ export default function InventoryPanel({ initialBarcode }) {
 	// Pull inventory reactively from IndexedDB using useLiveQuery
 	const [inventoryList, setInventoryList] = useState([]);
 	const [showScanner, setShowScanner] = useState(false);
-
-	
+	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		loadInventory();
 	}, []);
 
 	const loadInventory = async () => {
-		const { data, error } = await db
-			.from("inventory")
-			.select("*")
-			.order("id", { ascending: false });
+		try {
+			setLoading(true);
+			const { data, error } = await db
+				.from("inventory")
+				.select("*")
+				.order("id", { ascending: false });
 
-		if (error) {
+			if (error) {
+				console.error(error);
+				toast.error("Failed to load inventory", {
+					duration: 3000,
+					position: 'top-right',
+				});
+				return;
+			}
+
+			setInventoryList(data || []);
+			toast.success(`Loaded ${data?.length || 0} products`, {
+				duration: 2000,
+				position: 'top-right',
+				icon: '📦',
+			});
+		} catch (error) {
 			console.error(error);
-			return;
+			toast.error("Error loading inventory", {
+				duration: 3000,
+				position: 'top-right',
+			});
+		} finally {
+			setLoading(false);
 		}
-
-		setInventoryList(data || []);
 	};
 
 	const processInventoryBarcode = async (code) => {
-	try {
-		console.log('Processing barcode:', code);
-		
-		// Query the database for the barcode
-		const { data, error } = await db
-		.from('inventory')
-		.select('*')
-		.eq('barcode', code);
-		
-		console.log('Query result:', { data, error });
-		
-		if (error) {
-		console.error('Supabase error:', error);
-		toast.error(`Database error: ${error.message}`, {
-			duration: 3000,
-			position: 'top-right',
-		});
-		return;
-		}
-		
-		if (data && data.length > 0) {
-		// Product found - fill the form with existing data
-		const product = data[0];
-		console.log('Product found:', product);
-		
-		setEditingId(product.id);
-		setName(product.name);
-		setBarcode(product.barcode);
-		setCost_price(product.cost_price || '');
-		setSelling_price(product.selling_price || '');
-		setStock(product.stock || '');
-		
-		toast.success(`Product "${product.name}" loaded! 🎉`, {
-			duration: 2000,
-			position: 'top-right',
-		});
-		} else {
-		// Product not found - offer to add it
-		console.log('Product not found for barcode:', code);
-		
-		const result = await Swal.fire({
-			title: '📦 New Product Detected',
-			html: `
-			<div class="text-left">
-				<p class="mb-2">Barcode <strong>${code}</strong> is not registered in inventory.</p>
-				<p class="text-sm text-gray-500">Would you like to add this product?</p>
-			</div>
-			`,
-			icon: 'info',
-			showCancelButton: true,
-			confirmButtonColor: '#3b82f6',
-			cancelButtonColor: '#6b7280',
-			confirmButtonText: '✅ Yes, Add Product',
-			cancelButtonText: '❌ No, Cancel',
-		});
-		
-		if (result.isConfirmed) {
-			// Pre-fill the barcode and clear other fields for new product
-			setEditingId(null);
-			setBarcode(code);
-			setName('');
-			setCost_price('');
-			setSelling_price('');
-			setStock('');
+		try {
+			console.log('Processing barcode:', code);
 			
-			// Focus on the name field
-			setTimeout(() => {
-			document.getElementById('product-name')?.focus();
-			}, 300);
+			const { data, error } = await db
+				.from('inventory')
+				.select('*')
+				.eq('barcode', code);
 			
-			toast.success('Ready to add new product! Fill in the details below.', {
-			duration: 3000,
-			position: 'top-right',
-			});
-		} else {
-			toast.info('Product addition cancelled.', {
-			duration: 2000,
-			position: 'top-right',
+			console.log('Query result:', { data, error });
+			
+			if (error) {
+				console.error('Supabase error:', error);
+				toast.error(`Database error: ${error.message}`, {
+					duration: 3000,
+					position: 'top-right',
+				});
+				return;
+			}
+			
+			if (data && data.length > 0) {
+				const product = data[0];
+				console.log('Product found:', product);
+				
+				setEditingId(product.id);
+				setName(product.name);
+				setBarcode(product.barcode);
+				setCost_price(product.cost_price || '');
+				setSelling_price(product.selling_price || '');
+				setStock(product.stock || '');
+				
+				toast.success(`Product "${product.name}" loaded! 🎉`, {
+					duration: 2000,
+					position: 'top-right',
+				});
+			} else {
+				console.log('Product not found for barcode:', code);
+				
+				const result = await Swal.fire({
+					title: '📦 New Product Detected',
+					html: `
+						<div class="text-left">
+							<p class="mb-2">Barcode <strong>${code}</strong> is not registered in inventory.</p>
+							<p class="text-sm text-gray-500">Would you like to add this product?</p>
+						</div>
+					`,
+					icon: 'info',
+					showCancelButton: true,
+					confirmButtonColor: '#3b82f6',
+					cancelButtonColor: '#6b7280',
+					confirmButtonText: '✅ Yes, Add Product',
+					cancelButtonText: '❌ No, Cancel',
+				});
+				
+				if (result.isConfirmed) {
+					setEditingId(null);
+					setBarcode(code);
+					setName('');
+					setCost_price('');
+					setSelling_price('');
+					setStock('');
+					
+					setTimeout(() => {
+						document.getElementById('product-name')?.focus();
+					}, 300);
+					
+					toast.success('Ready to add new product! Fill in the details below.', {
+						duration: 3000,
+						position: 'top-right',
+					});
+				} else {
+					toast.info('Product addition cancelled.', {
+						duration: 2000,
+						position: 'top-right',
+					});
+				}
+			}
+		} catch (error) {
+			console.error('Error processing barcode:', error);
+			toast.error(`Error: ${error.message || 'Please try again'}`, {
+				duration: 3000,
+				position: 'top-right',
 			});
 		}
-		}
-	} catch (error) {
-		console.error('Error processing barcode:', error);
-		toast.error(`Error: ${error.message || 'Please try again'}`, {
-		duration: 3000,
-		position: 'top-right',
-		});
-	}
 	};
 	
-	// Handle manual barcode entry
 	const handleBarcodeSubmit = (e) => {
 		if (e.key === 'Enter' && barcode.trim()) {
-		processInventoryBarcode(barcode.trim());
+			processInventoryBarcode(barcode.trim());
 		}
 	};
 
@@ -148,8 +161,45 @@ export default function InventoryPanel({ initialBarcode }) {
 	// Handle saving new products or updating existing items
 	const handleSaveProduct = async (e) => {
 		e.preventDefault();
-		if (!name || !selling_price)
-			return alert("⚠️ Product Name and Selling Price are required.");
+		
+		if (!name || !selling_price) {
+			Swal.fire({
+				title: '⚠️ Missing Information',
+				text: 'Product Name and Selling Price are required.',
+				icon: 'warning',
+				confirmButtonColor: '#f59e0b',
+				confirmButtonText: 'OK',
+			});
+			return;
+		}
+
+		// Confirmation before saving
+		const confirmResult = await Swal.fire({
+			title: editingId ? '✏️ Update Product?' : '➕ Add New Product?',
+			html: `
+				<div class="text-left">
+					<p><strong>Product:</strong> ${name}</p>
+					<p><strong>Barcode:</strong> ${barcode || 'N/A'}</p>
+					<p><strong>Selling Price:</strong> ₱${Number(selling_price).toFixed(2)}</p>
+					<p><strong>Stock:</strong> ${Number(stock) || 0} units</p>
+				</div>
+			`,
+			icon: 'question',
+			showCancelButton: true,
+			confirmButtonColor: editingId ? '#f59e0b' : '#3b82f6',
+			cancelButtonColor: '#6b7280',
+			confirmButtonText: editingId ? '✅ Yes, Update' : '✅ Yes, Add',
+			cancelButtonText: '❌ No, Cancel',
+		});
+
+		if (!confirmResult.isConfirmed) {
+			toast.info('Operation cancelled', {
+				duration: 2000,
+				position: 'top-right',
+			});
+			return;
+		}
+
 		try {
 			if (editingId) {
 				const { error } = await db
@@ -165,7 +215,21 @@ export default function InventoryPanel({ initialBarcode }) {
 
 				if (error) throw error;
 
-				alert("✅ Product updated successfully!");
+				await Swal.fire({
+					title: '✅ Product Updated!',
+					text: `"${name}" has been successfully updated.`,
+					icon: 'success',
+					timer: 2000,
+					timerProgressBar: true,
+					confirmButtonColor: '#10b981',
+					confirmButtonText: 'OK',
+				});
+
+				toast.success(`Product "${name}" updated successfully! 🎉`, {
+					duration: 3000,
+					position: 'top-right',
+				});
+
 				setEditingId(null);
 			} else {
 				const { error } = await db.from("inventory").insert({
@@ -179,53 +243,185 @@ export default function InventoryPanel({ initialBarcode }) {
 
 				if (error) throw error;
 
-				alert("🎉 Product added successfully!");
+				await Swal.fire({
+					title: '🎉 Product Added!',
+					text: `"${name}" has been added to inventory.`,
+					icon: 'success',
+					timer: 2000,
+					timerProgressBar: true,
+					confirmButtonColor: '#10b981',
+					confirmButtonText: 'OK',
+				});
+
+				toast.success(`Product "${name}" added successfully! 🎉`, {
+					duration: 3000,
+					position: 'top-right',
+				});
 			}
 
+			// Clear form
 			setName("");
 			setBarcode("");
 			setCost_price("");
 			setSelling_price("");
 			setStock("");
+			setEditingId(null);
 
 			await loadInventory();
 		} catch (error) {
 			console.error(error);
-			alert(`❌ ${error.message}`);
+			
+			await Swal.fire({
+				title: '❌ Error!',
+				text: error.message || 'Failed to save product. Please try again.',
+				icon: 'error',
+				confirmButtonColor: '#ef4444',
+				confirmButtonText: 'OK',
+			});
+
+			toast.error(`Failed to save: ${error.message}`, {
+				duration: 3000,
+				position: 'top-right',
+			});
 		}
 	};
 
 	// Populate data inputs into form fields for correction editing
 	const startEdit = (item) => {
-		setEditingId(item.id);
-		setName(item.name);
-		setBarcode(item.barcode || "");
-		setCost_price(item.cost_price);
-		setSelling_price(item.selling_price);
-		setStock(item.stock);
-		// Smooth scroll to form
-		document
-			.getElementById("product-form")
-			?.scrollIntoView({ behavior: "smooth" });
+		Swal.fire({
+			title: '✏️ Edit Product',
+			text: `Are you sure you want to edit "${item.name}"?`,
+			icon: 'question',
+			showCancelButton: true,
+			confirmButtonColor: '#f59e0b',
+			cancelButtonColor: '#6b7280',
+			confirmButtonText: '✅ Yes, Edit',
+			cancelButtonText: '❌ No, Cancel',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				setEditingId(item.id);
+				setName(item.name);
+				setBarcode(item.barcode || "");
+				setCost_price(item.cost_price);
+				setSelling_price(item.selling_price);
+				setStock(item.stock);
+				
+				toast.info(`Editing "${item.name}"`, {
+					duration: 2000,
+					position: 'top-right',
+				});
+				
+				document
+					.getElementById("product-form")
+					?.scrollIntoView({ behavior: "smooth" });
+			} else {
+				toast.info('Edit cancelled', {
+					duration: 2000,
+					position: 'top-right',
+				});
+			}
+		});
 	};
 
 	// Delete product entry from IndexedDB permanently
 	const deleteItem = async (id, productName) => {
-		if (
-			confirm(
-				`⚠️ Delete "${productName}" from your store inventory registry permanently?`,
-			)
-		) {
+		const result = await Swal.fire({
+			title: '🗑️ Delete Product?',
+			html: `
+				<div class="text-left">
+					<p>Are you sure you want to delete <strong>"${productName}"</strong>?</p>
+					<p class="text-sm text-red-500 mt-2">⚠️ This action cannot be undone!</p>
+				</div>
+			`,
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#ef4444',
+			cancelButtonColor: '#6b7280',
+			confirmButtonText: '🗑️ Yes, Delete',
+			cancelButtonText: '❌ No, Cancel',
+		});
+
+		if (!result.isConfirmed) {
+			toast.info('Deletion cancelled', {
+				duration: 2000,
+				position: 'top-right',
+			});
+			return;
+		}
+
+		try {
 			const { error } = await db.from("inventory").delete().eq("id", id);
 
-			if (error) {
-				console.error(error);
-				return;
-			}
+			if (error) throw error;
+
+			await Swal.fire({
+				title: '🗑️ Product Deleted!',
+				text: `"${productName}" has been removed from inventory.`,
+				icon: 'success',
+				timer: 2000,
+				timerProgressBar: true,
+				confirmButtonColor: '#10b981',
+				confirmButtonText: 'OK',
+			});
+
+			toast.success(`Product "${productName}" deleted successfully!`, {
+				duration: 3000,
+				position: 'top-right',
+			});
 
 			await loadInventory();
-			alert("🗑️ Product deleted successfully!");
+		} catch (error) {
+			console.error(error);
+			
+			await Swal.fire({
+				title: '❌ Error!',
+				text: error.message || 'Failed to delete product. Please try again.',
+				icon: 'error',
+				confirmButtonColor: '#ef4444',
+				confirmButtonText: 'OK',
+			});
+
+			toast.error(`Failed to delete: ${error.message}`, {
+				duration: 3000,
+				position: 'top-right',
+			});
 		}
+	};
+
+	// Clear form confirmation
+	const clearForm = async () => {
+		if (name || barcode || cost_price || selling_price || stock) {
+			const result = await Swal.fire({
+				title: '🧹 Clear Form?',
+				text: 'All form data will be cleared. Are you sure?',
+				icon: 'question',
+				showCancelButton: true,
+				confirmButtonColor: '#6b7280',
+				cancelButtonColor: '#ef4444',
+				confirmButtonText: '✅ Yes, Clear',
+				cancelButtonText: '❌ No, Keep',
+			});
+
+			if (!result.isConfirmed) {
+				toast.info('Form clear cancelled', {
+					duration: 2000,
+					position: 'top-right',
+				});
+				return;
+			}
+		}
+
+		setEditingId(null);
+		setName("");
+		setBarcode("");
+		setCost_price("");
+		setSelling_price("");
+		setStock("");
+		
+		toast.info('Form cleared', {
+			duration: 2000,
+			position: 'top-right',
+		});
 	};
 
 	// Filter products based on search term and stock status
@@ -238,10 +434,12 @@ export default function InventoryPanel({ initialBarcode }) {
 			selectedCategory === "all"
 				? true
 				: selectedCategory === "lowStock"
-					? item.stock < 5
+					? item.stock < 5 && item.stock > 0
 					: selectedCategory === "outOfStock"
 						? item.stock === 0
-						: true;
+						: selectedCategory === "inStock"
+							? item.stock > 0
+							: true;
 		return matchesSearch && matchesCategory;
 	});
 
@@ -260,6 +458,32 @@ export default function InventoryPanel({ initialBarcode }) {
 
 	return (
 		<div className="space-y-6">
+			{/* Toast Container */}
+			<Toaster
+				position="top-right"
+				toastOptions={{
+					duration: 3000,
+					style: {
+						background: '#363636',
+						color: '#fff',
+					},
+					success: {
+						duration: 2000,
+						iconTheme: {
+							primary: '#10b981',
+							secondary: '#fff',
+						},
+					},
+					error: {
+						duration: 3000,
+						iconTheme: {
+							primary: '#ef4444',
+							secondary: '#fff',
+						},
+					},
+				}}
+			/>
+
 			{/* Header Stats Section */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 				<div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-5 text-white shadow-lg">
@@ -337,6 +561,7 @@ export default function InventoryPanel({ initialBarcode }) {
 									Product Name <span className="font-googlesans text-red-500">*</span>
 								</label>
 								<input
+									id="product-name"
 									type="text"
 									value={name}
 									onChange={(e) => setName(e.target.value)}
@@ -350,22 +575,24 @@ export default function InventoryPanel({ initialBarcode }) {
 								<label className="block text-xs font-bold text-gray-600 uppercase mb-2">
 									Barcode / SKU
 								</label>
-								<div className="relative">
-									<span className="absolute left-3 top-3.5 text-gray-400">
-										🔖
-									</span>
-									<input
-										type="text"
-										value={barcode}
-										onChange={(e) => setBarcode(e.target.value)}
-										placeholder="Scan or enter barcode"
-										className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none transition-all duration-200 font-mono text-sm"
-									/>
-
+								<div className="flex gap-2">
+									<div className="flex-1 relative">
+										<span className="absolute left-3 top-3.5 text-gray-400">
+											🔖
+										</span>
+										<input
+											type="text"
+											value={barcode}
+											onChange={(e) => setBarcode(e.target.value)}
+											onKeyDown={handleBarcodeSubmit}
+											placeholder="Scan or enter barcode"
+											className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none transition-all duration-200 font-mono text-sm"
+										/>
+									</div>
 									<button
 										type="button"
 										onClick={() => setShowScanner(!showScanner)}
-										className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
+										className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 whitespace-nowrap ${
 											showScanner
 												? "bg-red-500 text-white hover:bg-red-600"
 												: "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg"
@@ -452,14 +679,7 @@ export default function InventoryPanel({ initialBarcode }) {
 								{editingId && (
 									<button
 										type="button"
-										onClick={() => {
-											setEditingId(null);
-											setName("");
-											setBarcode("");
-											setCost_price("");
-											setSelling_price("");
-											setStock("");
-										}}
+										onClick={clearForm}
 										className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-300 transition-all duration-200">
 										Cancel
 									</button>
@@ -513,7 +733,14 @@ export default function InventoryPanel({ initialBarcode }) {
 						</div>
 
 						<div className="flex-1 overflow-y-auto max-h-[500px] custom-scrollbar">
-							{filteredProducts.length === 0 ? (
+							{loading ? (
+								<div className="flex items-center justify-center py-16">
+									<div className="text-center">
+										<div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+										<p className="text-gray-500">Loading inventory...</p>
+									</div>
+								</div>
+							) : filteredProducts.length === 0 ? (
 								<div className="flex flex-col items-center justify-center py-16 px-4">
 									<div className="text-6xl mb-4 opacity-30">📦</div>
 									<p className="text-gray-400 font-medium text-center">
@@ -650,6 +877,21 @@ export default function InventoryPanel({ initialBarcode }) {
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #94a3b8;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
         }
       `}</style>
 		</div>
