@@ -1,6 +1,6 @@
 // src/components/LoginPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';  // Use named import
 import { Eye, EyeOff, Mail, Lock, User, LogIn, UserPlus } from 'lucide-react';
 
 export default function LoginPage() {

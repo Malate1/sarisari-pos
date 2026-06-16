@@ -7,7 +7,7 @@ import InventoryPanel from "./InventoryPanel";
 import CreditPanel from "./CreditPanel";
 import ReportsPanel from "./ReportsPanel";
 import { db } from "./db";
-import { useAuth } from "./contexts/AuthContext";
+import { useAuth } from "./contexts/AuthContext";  // Use named import
 import { LogOut, User } from 'lucide-react';
 
 export default function App() {
