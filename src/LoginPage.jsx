@@ -71,9 +71,6 @@ export default function LoginPage() {
       if (result.success) {
         if (result.requiresConfirmation) {
           setRequiresConfirmation(true);
-        } else {
-          // Auto login after signup if email confirmation is disabled
-          // The auth state will update automatically
         }
       }
     }
@@ -333,18 +330,6 @@ export default function LoginPage() {
           >
             {isLogin ? 'Create New Account' : 'Sign In Instead'}
           </button>
-
-          {/* Demo Credentials Hint */}
-          {isLogin && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-              <p className="text-xs text-blue-800 font-semibold mb-2">📝 Demo Credentials</p>
-              <p className="text-xs text-blue-700">Email: demo@example.com</p>
-              <p className="text-xs text-blue-700">Password: demo123456</p>
-              <p className="text-xs text-gray-500 mt-2">
-                *Create an account to get started, or use the demo account above
-              </p>
-            </div>
-          )}
         </div>
       </div>
 
