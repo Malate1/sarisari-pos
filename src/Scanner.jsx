@@ -1,9 +1,11 @@
 // src/Scanner.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
 export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 	const scannerRef = useRef(null);
+	const lastBarcodeRef = useRef("");
+	const scanCountRef = useRef(0);
 	const [isScannerReady, setIsScannerReady] = useState(false);
 	const [isCameraActive, setIsCameraActive] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
@@ -95,8 +97,6 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				}
 			};
 
-			const lastBarcodeRef = useRef("");
-			const scanCountRef = useRef(0);
 			const handleSuccess = async (decodedText, decodedResult) => {
 				const barcode = decodedText.trim();
 
@@ -110,7 +110,7 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				}
 
 				// Must be detected 3 times consecutively
-				if (scanCountRef.current < 1) return;
+				if (scanCountRef.current < 3) return;
 
 				playSuccessFeedback();
 				onScanSuccess?.(barcode, decodedResult);
