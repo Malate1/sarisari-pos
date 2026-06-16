@@ -829,7 +829,7 @@ export default function InventoryPanel({ initialBarcode }) {
 														).toFixed(2)}
 													</div>
 												</div>
-												<div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+												<div className="flex gap-2">
 													<button
 														onClick={() => startEdit(item)}
 														className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors">
