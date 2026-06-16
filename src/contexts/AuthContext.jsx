@@ -15,48 +15,73 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Check for existing session on mount
   useEffect(() => {
-    // Get initial session
-    db.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsAuthenticated(!!session);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = db.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsAuthenticated(!!session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    const storedUser = localStorage.getItem('pos_user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('pos_user');
+      }
+    }
+    setLoading(false);
   }, []);
 
-  const signIn = async (email, password) => {
+  const signIn = async (username, password) => {
     try {
-      const { data, error } = await db.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Query the users table for matching username and password
+      const { data, error } = await db
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Login query error:', error);
+        toast.error('Invalid username or password', {
+          duration: 4000,
+          position: 'top-right',
+        });
+        return { success: false, error: 'Invalid credentials' };
+      }
 
-      toast.success('Welcome back! 🎉', {
+      if (!data) {
+        toast.error('Invalid username or password', {
+          duration: 4000,
+          position: 'top-right',
+        });
+        return { success: false, error: 'Invalid credentials' };
+      }
+
+      // Store user in localStorage
+      const userData = {
+        id: data.id,
+        name: data.name,
+        username: data.username,
+        store_id: data.store_id
+      };
+      
+      localStorage.setItem('pos_user', JSON.stringify(userData));
+      setUser(userData);
+      setIsAuthenticated(true);
+
+      toast.success(`Welcome back, ${data.name || data.username}! 🎉`, {
         duration: 3000,
         position: 'top-right',
       });
 
-      return { success: true, data };
+      return { success: true, data: userData };
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Failed to sign in', {
+      toast.error('Failed to sign in. Please try again.', {
         duration: 4000,
         position: 'top-right',
       });
@@ -64,35 +89,57 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (name, username, password) => {
     try {
-      const { data, error } = await db.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
-      });
+      // Check if username already exists
+      const { data: existingUser, error: checkError } = await db
+        .from('users')
+        .select('username')
+        .eq('username', username)
+        .single();
+
+      if (existingUser) {
+        toast.error('Username already exists. Please choose another.', {
+          duration: 4000,
+          position: 'top-right',
+        });
+        return { success: false, error: 'Username already exists' };
+      }
+
+      // Insert new user
+      const { data, error } = await db
+        .from('users')
+        .insert([
+          {
+            name: name,
+            username: username,
+            password: password,
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select()
+        .single();
 
       if (error) throw error;
 
-      if (data.user && data.session) {
-        toast.success('Account created successfully! 🎉', {
-          duration: 3000,
-          position: 'top-right',
-        });
-        return { success: true, data };
-      } else if (data.user && !data.session) {
-        toast.success('Please check your email to confirm your account! 📧', {
-          duration: 5000,
-          position: 'top-right',
-        });
-        return { success: true, requiresConfirmation: true };
-      }
+      // Auto-login after registration
+      const userData = {
+        id: data.id,
+        name: data.name,
+        username: data.username,
+        store_id: data.store_id
+      };
       
-      return { success: true, data };
+      localStorage.setItem('pos_user', JSON.stringify(userData));
+      setUser(userData);
+      setIsAuthenticated(true);
+
+      toast.success(`Account created successfully! Welcome, ${data.name}! 🎉`, {
+        duration: 3000,
+        position: 'top-right',
+      });
+
+      return { success: true, data: userData };
     } catch (error) {
       console.error('Signup error:', error);
       toast.error(error.message || 'Failed to create account', {
@@ -105,8 +152,9 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     try {
-      const { error } = await db.auth.signOut();
-      if (error) throw error;
+      localStorage.removeItem('pos_user');
+      setUser(null);
+      setIsAuthenticated(false);
       
       toast.success('Signed out successfully', {
         duration: 2000,
@@ -123,7 +171,6 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    session,
     loading,
     isAuthenticated,
     signIn,

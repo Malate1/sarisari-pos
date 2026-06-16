@@ -575,16 +575,17 @@ export default function App() {
 
 					<div className="flex items-center gap-4">
 					{/* User Info */}
+					
 					<div className="hidden md:flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-xl">
-						<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-						<User size={16} className="text-white" />
-						</div>
-						<div className="text-left">
+					<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+						<span className="text-white text-sm">👤</span>
+					</div>
+					<div className="text-left">
 						<p className="text-xs font-medium text-gray-600">Welcome,</p>
 						<p className="text-sm font-semibold text-gray-800">
-							{user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+						{user?.name || user?.username}
 						</p>
-						</div>
+					</div>
 					</div>
 
 					{/* Logout Button */}

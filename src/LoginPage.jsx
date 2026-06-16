@@ -1,7 +1,6 @@
 // src/components/LoginPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from './contexts/AuthContext';  // Use named import
-import { Eye, EyeOff, Mail, Lock, User, LogIn, UserPlus } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
   const { signIn, signUp, loading } = useAuth();
@@ -10,34 +9,38 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
     confirmPassword: '',
     fullName: '',
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [requiresConfirmation, setRequiresConfirmation] = useState(false);
 
-  // Clear confirmation message when switching modes
+  // Clear errors when switching modes
   useEffect(() => {
-    setRequiresConfirmation(false);
     setErrors({});
+    setFormData({
+      username: '',
+      password: '',
+      confirmPassword: '',
+      fullName: '',
+    });
   }, [isLogin]);
 
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    if (!formData.username) {
+      newErrors.username = 'Username is required';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters';
     }
     
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (formData.password.length < 4) {
+      newErrors.password = 'Password must be at least 4 characters';
     }
     
     if (!isLogin) {
@@ -62,17 +65,9 @@ export default function LoginPage() {
     setIsSubmitting(true);
     
     if (isLogin) {
-      const result = await signIn(formData.email, formData.password);
-      if (result.success) {
-        // Login successful - will redirect automatically
-      }
+      await signIn(formData.username, formData.password);
     } else {
-      const result = await signUp(formData.email, formData.password, formData.fullName);
-      if (result.success) {
-        if (result.requiresConfirmation) {
-          setRequiresConfirmation(true);
-        }
-      }
+      await signUp(formData.fullName, formData.username, formData.password);
     }
     
     setIsSubmitting(false);
@@ -90,7 +85,7 @@ export default function LoginPage() {
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setFormData({
-      email: '',
+      username: '',
       password: '',
       confirmPassword: '',
       fullName: '',
@@ -99,38 +94,6 @@ export default function LoginPage() {
     setShowPassword(false);
     setShowConfirmPassword(false);
   };
-
-  if (requiresConfirmation) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center animate-fadeIn">
-          <div className="mb-6">
-            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="w-10 h-10 text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Check Your Email</h2>
-            <p className="text-gray-600">
-              We've sent a confirmation link to <strong>{formData.email}</strong>
-            </p>
-          </div>
-          <p className="text-sm text-gray-500 mb-6">
-            Please click the link in your email to verify your account. After verification,
-            you can log in with your credentials.
-          </p>
-          <button
-            onClick={() => {
-              setRequiresConfirmation(false);
-              setIsLogin(true);
-              setFormData({ email: '', password: '', confirmPassword: '', fullName: '' });
-            }}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-          >
-            Back to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -161,7 +124,7 @@ export default function LoginPage() {
             {!isLogin && (
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  <User size={16} className="text-blue-600" />
+                  <span>👤</span>
                   Full Name
                 </label>
                 <div className="relative">
@@ -178,7 +141,7 @@ export default function LoginPage() {
                     }`}
                     disabled={isSubmitting || loading}
                   />
-                  <User size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                  <span className="absolute left-3 top-3.5 text-gray-400">👤</span>
                 </div>
                 {errors.fullName && (
                   <p className="text-xs text-red-500 animate-shake">{errors.fullName}</p>
@@ -186,38 +149,38 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Email */}
+            {/* Username */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Mail size={16} className="text-blue-600" />
-                Email Address
+                <span>👤</span>
+                Username
               </label>
               <div className="relative">
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="username"
+                  value={formData.username}
                   onChange={handleInputChange}
-                  placeholder="you@example.com"
+                  placeholder={isLogin ? "Enter your username" : "Choose a username"}
                   className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all duration-200 ${
-                    errors.email
+                    errors.username
                       ? 'border-red-400 focus:border-red-500'
                       : 'border-gray-200 focus:border-blue-400'
                   }`}
                   disabled={isSubmitting || loading}
-                  autoComplete="email"
+                  autoComplete="username"
                 />
-                <Mail size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                <span className="absolute left-3 top-3.5 text-gray-400">👤</span>
               </div>
-              {errors.email && (
-                <p className="text-xs text-red-500 animate-shake">{errors.email}</p>
+              {errors.username && (
+                <p className="text-xs text-red-500 animate-shake">{errors.username}</p>
               )}
             </div>
 
             {/* Password */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <Lock size={16} className="text-blue-600" />
+                <span>🔒</span>
                 Password
               </label>
               <div className="relative">
@@ -235,13 +198,13 @@ export default function LoginPage() {
                   disabled={isSubmitting || loading}
                   autoComplete={isLogin ? 'current-password' : 'new-password'}
                 />
-                <Lock size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                <span className="absolute left-3 top-3.5 text-gray-400">🔒</span>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? '👁️‍🗨️' : '👁️'}
                 </button>
               </div>
               {errors.password && (
@@ -253,7 +216,7 @@ export default function LoginPage() {
             {!isLogin && (
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                  <Lock size={16} className="text-blue-600" />
+                  <span>🔒</span>
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -271,13 +234,13 @@ export default function LoginPage() {
                     disabled={isSubmitting || loading}
                     autoComplete="new-password"
                   />
-                  <Lock size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                  <span className="absolute left-3 top-3.5 text-gray-400">🔒</span>
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showConfirmPassword ? '👁️‍🗨️' : '👁️'}
                   </button>
                 </div>
                 {errors.confirmPassword && (
@@ -303,7 +266,7 @@ export default function LoginPage() {
                 </>
               ) : (
                 <>
-                  {isLogin ? <LogIn size={18} /> : <UserPlus size={18} />}
+                  <span>{isLogin ? '🔑' : '✨'}</span>
                   <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
                 </>
               )}
@@ -330,6 +293,18 @@ export default function LoginPage() {
           >
             {isLogin ? 'Create New Account' : 'Sign In Instead'}
           </button>
+
+          {/* Demo Credentials Hint */}
+          {isLogin && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <p className="text-xs text-blue-800 font-semibold mb-2">📝 Demo Credentials</p>
+              <p className="text-xs text-blue-700">Username: admin</p>
+              <p className="text-xs text-blue-700">Password: admin123</p>
+              <p className="text-xs text-gray-500 mt-2">
+                *Create an account to get started, or ask your store administrator for credentials
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
