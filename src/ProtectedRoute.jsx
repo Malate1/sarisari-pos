@@ -1,6 +1,6 @@
 // src/components/ProtectedRoute.jsx
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from './contexts/AuthContext';
 import LoginPage from './LoginPage';
 
 export default function ProtectedRoute({ children }) {
