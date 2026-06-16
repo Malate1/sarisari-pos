@@ -1,6 +1,5 @@
 // src/contexts/AuthContext.jsx
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { AuthProvider } from "./contexts/AuthContext";
+import React, { AuthProvider, useState, useEffect, useContext } from "react";
 import { db } from './db';
 import toast from 'react-hot-toast';
 
