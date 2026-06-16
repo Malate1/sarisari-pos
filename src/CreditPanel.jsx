@@ -278,7 +278,7 @@ export default function CreditPanel({ onClose }) {
 						dueDate: dueDate || null,
 						notes: notes || null,
 						status: "unpaid",
-            paidAmount: 0,
+						paidAmount: 0.0,
 						updated_at: new Date().toISOString(),
 					},
 				])
@@ -445,23 +445,24 @@ export default function CreditPanel({ onClose }) {
 		setSearchResults([]);
 		setShowSuggestions(false);
 	};
-
 	const handleAddPayment = async (credit, paymentAmt) => {
-		const newPaidAmount = (credit.paidAmount || 0) + Number(paymentAmt);
-		const newStatus = newPaidAmount >= credit.amount ? "paid" : "partial";
+		const newPaidAmount =
+			Number(credit.paid_amount || credit.paidAmount || 0) + Number(paymentAmt);
+
+		const totalAmount = Number(credit.amount);
+		const newStatus = newPaidAmount >= totalAmount ? "paid" : "partial";
 
 		try {
-			await db
+			const { error } = await db
 				.from("credit_logs")
 				.update({
 					paidAmount: newPaidAmount,
 					status: newStatus,
 					updated_at: new Date().toISOString(),
-					...(newStatus === "paid" && {
-						updated_at: new Date().toISOString(),
-					}),
 				})
 				.eq("id", credit.id);
+
+			if (error) throw error;
 
 			await fetchCreditLogs();
 
@@ -469,14 +470,16 @@ export default function CreditPanel({ onClose }) {
 				duration: 3000,
 				position: "top-right",
 			});
+
 			setShowPaymentModal(false);
 			setPaymentAmount("");
 			setSelectedCredit(null);
 		} catch (error) {
 			console.error("Failed to add payment:", error);
+
 			Swal.fire({
 				title: "Error!",
-				text: "Failed to record payment.",
+				text: error.message || "Failed to record payment.",
 				icon: "error",
 				confirmButtonColor: "#ef4444",
 				confirmButtonText: "OK",
@@ -860,7 +863,9 @@ export default function CreditPanel({ onClose }) {
 															</div>
 															<p className="font-bold text-gray-800 text-lg">
 																₱
-																{(item.selling_price * item.quantity).toFixed(2)}
+																{(item.selling_price * item.quantity).toFixed(
+																	2,
+																)}
 															</p>
 														</div>
 													</div>
