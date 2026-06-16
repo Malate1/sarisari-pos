@@ -26,6 +26,50 @@ export default function InventoryPanel({ initialBarcode }) {
 		setInventoryList(data || []);
 	};
 
+	const processInventoryBarcode = async (code) => {
+		try {
+		const { data, error } = await db
+			.from('inventory')
+			.select('*')
+			.eq('barcode', code)
+			.single();
+		
+		if (error) throw error;
+		
+		if (data) {
+			setProduct(data);
+			// Auto-fill other form fields
+			setName(data.name);
+			setPrice(data.selling_price);
+			setStock(data.stock);
+			// etc.
+			
+			toast.success('Product found!', {
+			duration: 2000,
+			position: 'top-right',
+			});
+		} else {
+			toast.error('Product not found', {
+			duration: 2000,
+			position: 'top-right',
+			});
+		}
+		} catch (error) {
+		console.error('Error processing barcode:', error);
+		toast.error('Product not found', {
+			duration: 2000,
+			position: 'top-right',
+		});
+		}
+	};
+  
+  // Handle manual barcode entry
+  const handleBarcodeSubmit = (e) => {
+    if (e.key === 'Enter' && barcode.trim()) {
+      processInventoryBarcode(barcode.trim());
+    }
+  };
+
 	// Form State Values
 	const [editingId, setEditingId] = useState(null);
 	const [name, setName] = useState("");
@@ -276,7 +320,7 @@ export default function InventoryPanel({ initialBarcode }) {
 									<div className="mt-4 animate-fadeIn">
 										<Scanner
 											onScanSuccess={(code) => {
-												processBarcode(code);
+												processInventoryBarcode(code);
 												setShowScanner(false);
 											}}
 										/>
