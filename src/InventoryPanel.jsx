@@ -271,9 +271,17 @@ export default function InventoryPanel({ initialBarcode }) {
 										{showScanner ? "❌ Close" : "📷 Scan"}
 									</button>
 								</div>
-								<p className="text-xs text-gray-400 mt-1">
-									Optional but recommended for quick scanning
-								</p>
+								
+								{showScanner && (
+									<div className="mt-4 animate-fadeIn">
+										<Scanner
+											onScanSuccess={(code) => {
+												processBarcode(code);
+												setShowScanner(false);
+											}}
+										/>
+									</div>
+								)}
 							</div>
 
 							<div className="grid grid-cols-2 gap-4">
