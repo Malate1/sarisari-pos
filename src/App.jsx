@@ -565,7 +565,7 @@ export default function App() {
 					</div>
 					<div>
 						<h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-						LM SariHubs
+						LM SariHub 2026
 						</h1>
 						<p className="text-xs text-gray-500 font-medium">
 						Online Store Manager v1.0
