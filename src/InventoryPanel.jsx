@@ -257,6 +257,17 @@ export default function InventoryPanel({ initialBarcode }) {
 										placeholder="Scan or enter barcode"
 										className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none transition-all duration-200 font-mono text-sm"
 									/>
+
+									<button
+										type="button"
+										onClick={() => setShowScanner(!showScanner)}
+										className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
+											showScanner
+												? "bg-red-500 text-white hover:bg-red-600"
+												: "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg"
+										}`}>
+										{showScanner ? "❌ Close" : "📷 Scan"}
+									</button>
 								</div>
 								<p className="text-xs text-gray-400 mt-1">
 									Optional but recommended for quick scanning
