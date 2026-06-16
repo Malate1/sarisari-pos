@@ -1,10 +1,12 @@
 // src/InventoryPanel.jsx
 import React, { useState, useEffect } from "react";
 import { db } from "./db";
+import Scanner from "./Scanner";
 
 export default function InventoryPanel({ initialBarcode }) {
 	// Pull inventory reactively from IndexedDB using useLiveQuery
 	const [inventoryList, setInventoryList] = useState([]);
+	const [showScanner, setShowScanner] = useState(false);
 
 	useEffect(() => {
 		loadInventory();
