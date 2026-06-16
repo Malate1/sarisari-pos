@@ -1,5 +1,7 @@
 // src/InventoryPanel.jsx
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+import toast, { Toaster } from "react-hot-toast";
 import { db } from "./db";
 import Scanner from "./Scanner";
 
@@ -27,40 +29,67 @@ export default function InventoryPanel({ initialBarcode }) {
 	};
 
 	const processInventoryBarcode = async (code) => {
-		try {
+	try {
 		const { data, error } = await db
-			.from('inventory')
-			.select('*')
-			.eq('barcode', code)
-			.single();
+		.from('inventory')
+		.select('*')
+		.eq('barcode', code)
+		.single();
 		
-		if (error) throw error;
+		if (error && error.code !== 'PGRST116') {
+		throw error;
+		}
 		
 		if (data) {
-			setProduct(data);
-			// Auto-fill other form fields
-			setName(data.name);
-			setPrice(data.selling_price);
-			setStock(data.stock);
-			// etc.
-			
-			toast.success('Product found!', {
-			duration: 2000,
-			position: 'top-right',
-			});
-		} else {
-			toast.error('Product not found', {
-			duration: 2000,
-			position: 'top-right',
-			});
-		}
-		} catch (error) {
-		console.error('Error processing barcode:', error);
-		toast.error('Product not found', {
+		// Product found
+		setProduct(data);
+		setName(data.name);
+		setSellingPrice(data.selling_price);
+		setStock(data.stock);
+		
+		toast.success(`Product "${data.name}" found! 🎉`, {
 			duration: 2000,
 			position: 'top-right',
 		});
+		} else {
+		// Product not found - simple suggestion
+		setBarcode(code); // Pre-fill barcode field
+		
+		Swal.fire({
+			title: '📦 New Product Detected',
+			text: `Barcode "${code}" is not in inventory. Would you like to add this product?`,
+			icon: 'info',
+			showCancelButton: true,
+			confirmButtonColor: '#3b82f6',
+			cancelButtonColor: '#6b7280',
+			confirmButtonText: 'Yes, Add Product',
+			cancelButtonText: 'No, Cancel',
+		}).then((result) => {
+			if (result.isConfirmed) {
+			// Clear form and set to add mode
+			setIsEditing(false);
+			setProduct(null);
+			setName('');
+			setSellingPrice('');
+			setStock('');
+			
+			// Focus on the form
+			document.getElementById('product-name')?.focus();
+			
+			toast.success('Ready to add new product!', {
+				duration: 2000,
+				position: 'top-right',
+			});
+			}
+		});
 		}
+	} catch (error) {
+		console.error('Error processing barcode:', error);
+		toast.error('Error processing barcode. Please try again.', {
+		duration: 3000,
+		position: 'top-right',
+		});
+	}
 	};
   
   // Handle manual barcode entry
