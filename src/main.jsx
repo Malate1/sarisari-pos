@@ -1,11 +1,11 @@
 // src/main.jsx
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
-import App from './App.jsx'
-import './index.css'
-import { db } from './db.js'
+import App from './App.jsx';
+import './index.css';
+import { db } from './db';
 
 // Simple script to pre-fill products if the database is completely empty
 const seedDatabase = async () => {
