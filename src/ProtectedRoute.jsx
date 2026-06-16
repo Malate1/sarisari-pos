@@ -1,6 +1,6 @@
 // src/components/ProtectedRoute.jsx
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';  // Use named import
+import { useAuth } from './contexts/AuthContext';  // Use named import
 import LoginPage from './LoginPage';
 
 export default function ProtectedRoute({ children }) {
