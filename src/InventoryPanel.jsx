@@ -156,8 +156,7 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [stock, setStock] = useState("");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
-	let imageUrl = item.image_url;
-
+	let imageUrl = "";
 	// Update barcode when initialBarcode prop changes
 	useEffect(() => {
 		if (initialBarcode) {
@@ -171,17 +170,9 @@ export default function InventoryPanel({ initialBarcode }) {
 
 		try {
 
-			
-
 			if (imageFile) {
 
-				if (item.image_url) {
-					const oldFile = getFileNameFromUrl(item.image_url);
-
-					await db.storage
-					.from("product-images")
-					.remove([oldFile]);
-				}
+				
 				const fileName =
 					Date.now() + "_" + imageFile.name.replace(/\s+/g, "_");
 
@@ -191,6 +182,14 @@ export default function InventoryPanel({ initialBarcode }) {
 
 				if (uploadError) throw uploadError;
 
+				if (fileName) {
+					const oldFile = getFileNameFromUrl(fileName);
+
+					await db.storage
+					.from("product-images")
+					.remove([oldFile]);
+				}
+
 				const { data } = db.storage
 					.from("product-images")
 					.getPublicUrl(fileName);
@@ -198,7 +197,6 @@ export default function InventoryPanel({ initialBarcode }) {
 				imageUrl = data.publicUrl;
 			}
 
-			// insert/update here
 
 		} catch(error) {
 			console.error(error);
