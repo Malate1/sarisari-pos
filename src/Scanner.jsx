@@ -8,6 +8,7 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 	const [isCameraActive, setIsCameraActive] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [permissionGranted, setPermissionGranted] = useState(null);
+	const isShuttingDown = useRef(false);
 
 	useEffect(() => {
 		// Request camera permission first
@@ -16,7 +17,7 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				const stream = await navigator.mediaDevices.getUserMedia({
 					video: true,
 				});
-				stream.getTracks().forEach((track) => track.stop()); // Stop stream after checking
+				stream.getTracks().forEach((track) => track.stop());
 				setPermissionGranted(true);
 				initializeScanner();
 			} catch (err) {
@@ -29,27 +30,66 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 			}
 		};
 		checkCameraPermission();
+
+		// Cleanup on unmount
 		return () => {
+			cleanupScanner();
+		};
+	}, []);
+
+	const cleanupScanner = async () => {
+		// Prevent multiple cleanup attempts
+		if (isShuttingDown.current) return;
+		isShuttingDown.current = true;
+
+		try {
 			if (scannerRef.current) {
-				scannerRef.current
-					.clear()
-					.catch(() => {})
-					.finally(() => {
-						scannerRef.current = null;
-					});
+				// Stop the camera first
+				try {
+					await scannerRef.current.stop();
+				} catch (stopError) {
+					console.log("Stop error (ignored):", stopError);
+				}
+
+				// Then clear the scanner
+				try {
+					await scannerRef.current.clear();
+				} catch (clearError) {
+					console.log("Clear error (ignored):", clearError);
+				}
+
+				scannerRef.current = null;
 			}
 
-			navigator.mediaDevices?.enumerateDevices?.().then(() => {});
-		};
-	}, [onScanSuccess, onScanFailure, onClose]);
+			// Stop all media tracks
+			const tracks = await navigator.mediaDevices.getUserMedia({ video: true })
+				.then(stream => {
+					stream.getTracks().forEach(track => track.stop());
+				})
+				.catch(() => {});
+
+		} catch (err) {
+			console.error("Cleanup error:", err);
+		} finally {
+			setIsCameraActive(false);
+			setIsScannerReady(false);
+			isShuttingDown.current = false;
+		}
+	};
 
 	const initializeScanner = async () => {
 		try {
-			// prevent double init (IMPORTANT FIX)
-			if (scannerRef.current) return;
+			// Prevent double init
+			if (scannerRef.current || isShuttingDown.current) return;
 
 			const el = document.getElementById("reader");
-			if (!el) return;
+			if (!el) {
+				setErrorMessage("Scanner element not found");
+				return;
+			}
+
+			// Clear any existing content
+			el.innerHTML = "";
 
 			const devices = await Html5Qrcode.getCameras();
 			if (!devices?.length) {
@@ -71,30 +111,6 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				],
 			};
 
-			const safeShutdown = async () => {
-				try {
-					if (!scannerRef.current) return;
-
-					// HARD STOP FIRST (prevents white screen)
-					try {
-						await scannerRef.current.stop();
-					} catch {}
-
-					// THEN CLEAR
-					try {
-						await scannerRef.current.clear();
-					} catch {}
-
-					scannerRef.current = null;
-					setIsCameraActive(false);
-
-					setTimeout(() => onClose?.(), 120);
-				} catch (err) {
-					console.error("Shutdown error:", err);
-					onClose?.();
-				}
-			};
-
 			const handleSuccess = async (decodedText, decodedResult) => {
 				const barcode = decodedText.trim();
 
@@ -102,9 +118,19 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 				if (!/^\d+$/.test(barcode)) return;
 
 				playSuccessFeedback();
-				onScanSuccess?.(barcode, decodedResult);
+				
+				// Call the success callback
+				if (onScanSuccess) {
+					onScanSuccess(barcode, decodedResult);
+				}
 
-				await safeShutdown();
+				// Clean up after successful scan
+				await cleanupScanner();
+				
+				// Call onClose after cleanup
+				if (onClose) {
+					setTimeout(() => onClose(), 100);
+				}
 			};
 
 			await scanner.start(
@@ -115,19 +141,22 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 					if (errorMessage?.includes("No MultiFormat Readers")) {
 						setErrorMessage("Position barcode clearly in frame");
 					}
-					onScanFailure?.(errorMessage);
+					if (onScanFailure) {
+						onScanFailure(errorMessage);
+					}
 				},
 			);
 			setIsCameraActive(true);
 			setIsScannerReady(true);
 			setErrorMessage("");
 		} catch (err) {
-			console.error(err);
-			setErrorMessage("Failed to initialize scanner");
+			console.error("Scanner initialization error:", err);
+			setErrorMessage("Failed to initialize scanner: " + err.message);
+			setIsScannerReady(false);
 		}
 	};
+
 	const playSuccessFeedback = () => {
-		// Play a subtle beep sound (optional)
 		try {
 			const audioContext = new (
 				window.AudioContext || window.webkitAudioContext
@@ -148,16 +177,47 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 			);
 			oscillator.stop(audioContext.currentTime + 0.3);
 
-			audioContext.close();
+			setTimeout(() => {
+				audioContext.close();
+			}, 400);
 		} catch (err) {
 			// Audio context might fail in some browsers, ignore
+		}
+	};
+
+	const handleClose = async () => {
+		await cleanupScanner();
+		if (onClose) {
+			setTimeout(() => onClose(), 50);
 		}
 	};
 
 	const handleRetry = () => {
 		setErrorMessage("");
 		setPermissionGranted(null);
-		window.location.reload(); // Simple reload to retry
+		setIsScannerReady(false);
+		setIsCameraActive(false);
+		
+		// Clean up existing scanner before retry
+		cleanupScanner().then(() => {
+			// Re-initialize after cleanup
+			setTimeout(() => {
+				const checkCamera = async () => {
+					try {
+						const stream = await navigator.mediaDevices.getUserMedia({
+							video: true,
+						});
+						stream.getTracks().forEach((track) => track.stop());
+						setPermissionGranted(true);
+						initializeScanner();
+					} catch (err) {
+						setPermissionGranted(false);
+						setErrorMessage("Camera access denied. Please enable camera permissions.");
+					}
+				};
+				checkCamera();
+			}, 300);
+		});
 	};
 
 	return (
@@ -175,8 +235,9 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 					</div>
 					{onClose && (
 						<button
-							onClick={onClose}
-							className="text-white/80 hover:text-white transition-colors text-2xl leading-none">
+							onClick={handleClose}
+							className="text-white/80 hover:text-white transition-colors text-2xl leading-none"
+							aria-label="Close scanner">
 							✕
 						</button>
 					)}
@@ -278,34 +339,34 @@ export default function Scanner({ onScanSuccess, onScanFailure, onClose }) {
 
 			{/* Add custom animations */}
 			<style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        
-        @keyframes scanLine {
-          0% {
-            transform: translateY(-100%);
-          }
-          100% {
-            transform: translateY(300px);
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-scanLine {
-          animation: scanLine 2s linear infinite;
-        }
-      `}</style>
+				@keyframes fadeIn {
+					from {
+						opacity: 0;
+						transform: scale(0.95);
+					}
+					to {
+						opacity: 1;
+						transform: scale(1);
+					}
+				}
+				
+				@keyframes scanLine {
+					0% {
+						transform: translateY(-100%);
+					}
+					100% {
+						transform: translateY(300px);
+					}
+				}
+				
+				.animate-fadeIn {
+					animation: fadeIn 0.3s ease-out;
+				}
+				
+				.animate-scanLine {
+					animation: scanLine 2s linear infinite;
+				}
+			`}</style>
 		</div>
 	);
 }
