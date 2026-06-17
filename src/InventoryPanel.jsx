@@ -1,5 +1,5 @@
 // src/InventoryPanel.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import toast, { Toaster } from "react-hot-toast";
 import { db } from "./db";
@@ -12,6 +12,11 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [loading, setLoading] = useState(false);
 	const [imageFile, setImageFile] = useState(null);
 	const [imagePreview, setImagePreview] = useState("");
+	const [showCamera, setShowCamera] = useState(false);
+	const videoRef = useRef(null);
+	const canvasRef = useRef(null);
+	const streamRef = useRef(null);
+	
 	const getFileNameFromUrl = (url) => {
 		if (!url) return null;
 		return url.split("/").pop(); // gets filename
@@ -20,6 +25,75 @@ export default function InventoryPanel({ initialBarcode }) {
 	useEffect(() => {
 		loadInventory();
 	}, []);
+
+	useEffect(() => {
+		if (showCamera) {
+			startCamera();
+		} else {
+			stopCamera();
+		}
+
+		return () => {
+			stopCamera();
+		};
+	}, [showCamera]);
+
+	const startCamera = async () => {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({
+				video: { facingMode: "environment" }
+			});
+			
+			if (videoRef.current) {
+				videoRef.current.srcObject = stream;
+				streamRef.current = stream;
+			}
+		} catch (error) {
+			console.error('Error accessing camera:', error);
+			toast.error('Unable to access camera. Please check permissions.', {
+				duration: 3000,
+				position: 'top-right',
+			});
+			setShowCamera(false);
+		}
+	};
+
+	const stopCamera = () => {
+		if (streamRef.current) {
+			streamRef.current.getTracks().forEach(track => track.stop());
+			streamRef.current = null;
+		}
+		if (videoRef.current) {
+			videoRef.current.srcObject = null;
+		}
+	};
+
+	const capturePhoto = () => {
+		if (videoRef.current && canvasRef.current) {
+			const canvas = canvasRef.current;
+			const video = videoRef.current;
+			
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+			
+			const context = canvas.getContext('2d');
+			context.drawImage(video, 0, 0, canvas.width, canvas.height);
+			
+			canvas.toBlob((blob) => {
+				if (blob) {
+					const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+					setImageFile(file);
+					setImagePreview(URL.createObjectURL(file));
+					setShowCamera(false);
+					
+					toast.success('Photo captured successfully! 📸', {
+						duration: 2000,
+						position: 'top-right',
+					});
+				}
+			}, 'image/jpeg', 0.8);
+		}
+	};
 
 	const loadInventory = async () => {
 		try {
@@ -85,6 +159,7 @@ export default function InventoryPanel({ initialBarcode }) {
 				setCost_price(product.cost_price || '');
 				setSelling_price(product.selling_price || '');
 				setStock(product.stock || '');
+				setImagePreview(product.image_url || '');
 				
 				toast.success(`Product "${product.name}" loaded! 🎉`, {
 					duration: 2000,
@@ -157,6 +232,7 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
 	let imageUrl = "";
+	
 	// Update barcode when initialBarcode prop changes
 	useEffect(() => {
 		if (initialBarcode) {
@@ -169,11 +245,7 @@ export default function InventoryPanel({ initialBarcode }) {
 		e.preventDefault();
 
 		try {
-
-			
-
 			if (imageFile) {
-				
 				const fileName =
 					Date.now() + "_" + imageFile.name.replace(/\s+/g, "_");
 
@@ -190,51 +262,44 @@ export default function InventoryPanel({ initialBarcode }) {
 				imageUrl = data.publicUrl;
 			}
 
-			// insert/update here
+			if (!name || !selling_price) {
+				Swal.fire({
+					title: '⚠️ Missing Information',
+					text: 'Product Name and Selling Price are required.',
+					icon: 'warning',
+					confirmButtonColor: '#f59e0b',
+					confirmButtonText: 'OK',
+				});
+				return;
+			}
 
-		} catch(error) {
-			console.error(error);
-		}
-		
-		if (!name || !selling_price) {
-			Swal.fire({
-				title: '⚠️ Missing Information',
-				text: 'Product Name and Selling Price are required.',
-				icon: 'warning',
-				confirmButtonColor: '#f59e0b',
-				confirmButtonText: 'OK',
+			// Confirmation before saving
+			const confirmResult = await Swal.fire({
+				title: editingId ? '✏️ Update Product?' : '➕ Add New Product?',
+				html: `
+					<div class="text-left">
+						<p><strong>Product:</strong> ${name}</p>
+						<p><strong>Barcode:</strong> ${barcode || 'N/A'}</p>
+						<p><strong>Selling Price:</strong> ₱${Number(selling_price).toFixed(2)}</p>
+						<p><strong>Stock:</strong> ${Number(stock) || 0} units</p>
+					</div>
+				`,
+				icon: 'question',
+				showCancelButton: true,
+				confirmButtonColor: editingId ? '#f59e0b' : '#3b82f6',
+				cancelButtonColor: '#6b7280',
+				confirmButtonText: editingId ? '✅ Yes, Update' : '✅ Yes, Add',
+				cancelButtonText: '❌ No, Cancel',
 			});
-			return;
-		}
 
-		// Confirmation before saving
-		const confirmResult = await Swal.fire({
-			title: editingId ? '✏️ Update Product?' : '➕ Add New Product?',
-			html: `
-				<div class="text-left">
-					<p><strong>Product:</strong> ${name}</p>
-					<p><strong>Barcode:</strong> ${barcode || 'N/A'}</p>
-					<p><strong>Selling Price:</strong> ₱${Number(selling_price).toFixed(2)}</p>
-					<p><strong>Stock:</strong> ${Number(stock) || 0} units</p>
-				</div>
-			`,
-			icon: 'question',
-			showCancelButton: true,
-			confirmButtonColor: editingId ? '#f59e0b' : '#3b82f6',
-			cancelButtonColor: '#6b7280',
-			confirmButtonText: editingId ? '✅ Yes, Update' : '✅ Yes, Add',
-			cancelButtonText: '❌ No, Cancel',
-		});
+			if (!confirmResult.isConfirmed) {
+				toast.info('Operation cancelled', {
+					duration: 2000,
+					position: 'top-right',
+				});
+				return;
+			}
 
-		if (!confirmResult.isConfirmed) {
-			toast.info('Operation cancelled', {
-				duration: 2000,
-				position: 'top-right',
-			});
-			return;
-		}
-
-		try {
 			if (editingId) {
 				const { error } = await db
 					.from("inventory")
@@ -244,7 +309,7 @@ export default function InventoryPanel({ initialBarcode }) {
 						cost_price: Number(cost_price) || 0,
 						selling_price: Number(selling_price),
 						stock: Number(stock) || 0,
-  						image_url: imageUrl
+						image_url: imageUrl || imagePreview || null
 					})
 					.eq("id", editingId);
 
@@ -273,7 +338,7 @@ export default function InventoryPanel({ initialBarcode }) {
 					cost_price: Number(cost_price) || 0,
 					selling_price: Number(selling_price),
 					stock: Number(stock) || 0,
-    				image_url: imageUrl,
+					image_url: imageUrl || null,
 					created_at: new Date().toISOString()
 				});
 
@@ -302,6 +367,9 @@ export default function InventoryPanel({ initialBarcode }) {
 			setSelling_price("");
 			setStock("");
 			setEditingId(null);
+			setImageFile(null);
+			setImagePreview("");
+			setShowCamera(false);
 
 			await loadInventory();
 		} catch (error) {
@@ -465,6 +533,7 @@ export default function InventoryPanel({ initialBarcode }) {
 		setStock("");
 		setImageFile(null);
 		setImagePreview("");
+		setShowCamera(false);
 		
 		toast.info('Form cleared', {
 			duration: 2000,
@@ -609,27 +678,85 @@ export default function InventoryPanel({ initialBarcode }) {
 									Product Photo
 								</label>
 
+								<div className="flex gap-2 mb-3">
+									<button
+										type="button"
+										onClick={() => {
+											setShowCamera(true);
+											document.getElementById('file-input')?.click();
+										}}
+										className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all duration-200">
+										📸 Take Photo
+									</button>
+									<button
+										type="button"
+										onClick={() => document.getElementById('file-input')?.click()}
+										className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all duration-200">
+										📁 Upload File
+									</button>
+								</div>
+
 								<input
+									id="file-input"
 									type="file"
 									accept="image/*"
 									onChange={(e) => {
-									const file = e.target.files[0];
-
-									if (file) {
-										setImageFile(file);
-										setImagePreview(URL.createObjectURL(file));
-									}
+										const file = e.target.files[0];
+										if (file) {
+											setImageFile(file);
+											setImagePreview(URL.createObjectURL(file));
+											setShowCamera(false);
+										}
 									}}
-									className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl"
+									className="hidden"
 								/>
 
-								{imagePreview && (
+								{showCamera && (
+									<div className="mt-3 animate-fadeIn">
+										<div className="relative bg-black rounded-xl overflow-hidden">
+											<video
+												ref={videoRef}
+												autoPlay
+												playsInline
+												className="w-full h-auto max-h-[300px] object-cover"
+											/>
+											<canvas ref={canvasRef} className="hidden" />
+											<div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+												<button
+													type="button"
+													onClick={() => setShowCamera(false)}
+													className="px-6 py-2 bg-red-500 text-white rounded-full font-semibold hover:bg-red-600 transition-colors">
+													❌ Cancel
+												</button>
+												<button
+													type="button"
+													onClick={capturePhoto}
+													className="px-6 py-2 bg-white text-gray-800 rounded-full font-semibold hover:bg-gray-100 transition-colors">
+													📸 Capture
+												</button>
+											</div>
+										</div>
+									</div>
+								)}
+
+								{imagePreview && !showCamera && (
 									<div className="mt-3">
-									<img
-										src={imagePreview}
-										alt="Preview"
-										className="w-32 h-32 object-cover rounded-xl border"
-									/>
+										<div className="relative inline-block">
+											<img
+												src={imagePreview}
+												alt="Preview"
+												className="w-32 h-32 object-cover rounded-xl border shadow-sm"
+											/>
+											<button
+												type="button"
+												onClick={() => {
+													setImageFile(null);
+													setImagePreview("");
+												}}
+												className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors">
+												×
+											</button>
+										</div>
 									</div>
 								)}
 							</div>
@@ -837,44 +964,45 @@ export default function InventoryPanel({ initialBarcode }) {
 											key={item.id}
 											className="p-5 hover:bg-gray-50 transition-all duration-200 group">
 											<div className="flex justify-between items-start gap-4 mb-3">
-  												<div className="flex gap-4 flex-1">
-												
+												<div className="flex gap-4 flex-1">
 													<img
 														src={item.image_url || "/no-image.png"}
 														alt={item.name}
 														className="w-20 h-20 object-cover rounded-xl border shadow-sm"
-														/>
-													<div className="flex items-center gap-2 flex-wrap">
-														<h4 className="font-bold text-gray-800 text-base">
-															{item.name}
-														</h4>
-														<span
-															className={`text-xs px-2 py-1 rounded-full font-semibold ${
-																item.stock === 0
-																	? "bg-red-100 text-red-700"
+													/>
+													<div>
+														<div className="flex items-center gap-2 flex-wrap">
+															<h4 className="font-bold text-gray-800 text-base">
+																{item.name}
+															</h4>
+															<span
+																className={`text-xs px-2 py-1 rounded-full font-semibold ${
+																	item.stock === 0
+																		? "bg-red-100 text-red-700"
+																		: item.stock < 5
+																			? "bg-yellow-100 text-yellow-700"
+																			: "bg-green-100 text-green-700"
+																}`}>
+																{item.stock === 0
+																	? "Out of Stock"
 																	: item.stock < 5
-																		? "bg-yellow-100 text-yellow-700"
-																		: "bg-green-100 text-green-700"
-															}`}>
-															{item.stock === 0
-																? "Out of Stock"
-																: item.stock < 5
-																	? "Low Stock"
-																	: "In Stock"}
-														</span>
-													</div>
-													<div className="flex items-center gap-3 mt-2 flex-wrap">
-														{item.barcode && (
-															<span className="text-[10px] font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">
-																🔖 {item.barcode}
+																		? "Low Stock"
+																		: "In Stock"}
 															</span>
-														)}
-														<span className="text-[10px] text-gray-400">
-															📅 Added:{" "}
-															{item.created_at
-																? new Date(item.created_at).toLocaleDateString()
-																: "N/A"}
-														</span>
+														</div>
+														<div className="flex items-center gap-3 mt-2 flex-wrap">
+															{item.barcode && (
+																<span className="text-[10px] font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">
+																	🔖 {item.barcode}
+																</span>
+															)}
+															<span className="text-[10px] text-gray-400">
+																📅 Added:{" "}
+																{item.created_at
+																	? new Date(item.created_at).toLocaleDateString()
+																	: "N/A"}
+															</span>
+														</div>
 													</div>
 												</div>
 												<div className="text-right">
