@@ -12,6 +12,10 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [loading, setLoading] = useState(false);
 	const [imageFile, setImageFile] = useState(null);
 	const [imagePreview, setImagePreview] = useState("");
+	const getFileNameFromUrl = (url) => {
+		if (!url) return null;
+		return url.split("/").pop(); // gets filename
+	};
 
 	useEffect(() => {
 		loadInventory();
@@ -152,7 +156,8 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [stock, setStock] = useState("");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
-	let imageUrl = "";
+	let imageUrl = item.image_url;
+
 	// Update barcode when initialBarcode prop changes
 	useEffect(() => {
 		if (initialBarcode) {
@@ -169,6 +174,14 @@ export default function InventoryPanel({ initialBarcode }) {
 			
 
 			if (imageFile) {
+
+				if (item.image_url) {
+					const oldFile = getFileNameFromUrl(item.image_url);
+
+					await db.storage
+					.from("product-images")
+					.remove([oldFile]);
+				}
 				const fileName =
 					Date.now() + "_" + imageFile.name.replace(/\s+/g, "_");
 
@@ -386,6 +399,14 @@ export default function InventoryPanel({ initialBarcode }) {
 			const { error } = await db.from("inventory").delete().eq("id", id);
 
 			if (error) throw error;
+
+			if (imageUrl) {
+				const fileName = getFileNameFromUrl(imageUrl);
+
+				await db.storage
+					.from("product-images")
+					.remove([fileName]);
+			}
 
 			await Swal.fire({
 				title: '🗑️ Product Deleted!',
