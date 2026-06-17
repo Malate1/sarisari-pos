@@ -164,23 +164,31 @@ export default function InventoryPanel({ initialBarcode }) {
 	const handleSaveProduct = async (e) => {
 		e.preventDefault();
 
-		let imageUrl = imagePreview;
+		try {
 
-		if (imageFile) {
-		const fileName =
-			Date.now() + "_" + imageFile.name.replace(/\s+/g, "_");
+			let imageUrl = imagePreview;
 
-		const { error: uploadError } = await db.storage
-			.from("product-images")
-			.upload(fileName, imageFile);
+			if (imageFile) {
+				const fileName =
+					Date.now() + "_" + imageFile.name.replace(/\s+/g, "_");
 
-		if (uploadError) throw uploadError;
+				const { error: uploadError } = await db.storage
+					.from("product-images")
+					.upload(fileName, imageFile);
 
-		const { data } = db.storage
-			.from("product-images")
-			.getPublicUrl(fileName);
+				if (uploadError) throw uploadError;
 
-		imageUrl = data.publicUrl;
+				const { data } = db.storage
+					.from("product-images")
+					.getPublicUrl(fileName);
+
+				imageUrl = data.publicUrl;
+			}
+
+			// insert/update here
+
+		} catch(error) {
+			console.error(error);
 		}
 		
 		if (!name || !selling_price) {
@@ -260,6 +268,7 @@ export default function InventoryPanel({ initialBarcode }) {
 					cost_price: Number(cost_price) || 0,
 					selling_price: Number(selling_price),
 					stock: Number(stock) || 0,
+    				image_url: imageUrl,
 					created_at: new Date().toISOString()
 				});
 
