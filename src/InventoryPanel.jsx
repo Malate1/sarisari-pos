@@ -10,6 +10,8 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [inventoryList, setInventoryList] = useState([]);
 	const [showScanner, setShowScanner] = useState(false);
 	const [loading, setLoading] = useState(false);
+	const [imageFile, setImageFile] = useState(null);
+	const [imagePreview, setImagePreview] = useState("");
 
 	useEffect(() => {
 		loadInventory();
@@ -161,6 +163,25 @@ export default function InventoryPanel({ initialBarcode }) {
 	// Handle saving new products or updating existing items
 	const handleSaveProduct = async (e) => {
 		e.preventDefault();
+
+		let imageUrl = imagePreview;
+
+		if (imageFile) {
+		const fileName =
+			Date.now() + "_" + imageFile.name.replace(/\s+/g, "_");
+
+		const { error: uploadError } = await db.storage
+			.from("product-images")
+			.upload(fileName, imageFile);
+
+		if (uploadError) throw uploadError;
+
+		const { data } = db.storage
+			.from("product-images")
+			.getPublicUrl(fileName);
+
+		imageUrl = data.publicUrl;
+		}
 		
 		if (!name || !selling_price) {
 			Swal.fire({
@@ -209,7 +230,8 @@ export default function InventoryPanel({ initialBarcode }) {
 						barcode: barcode.trim() || null,
 						cost_price: Number(cost_price) || 0,
 						selling_price: Number(selling_price),
-						stock: Number(stock) || 0
+						stock: Number(stock) || 0,
+  						image_url: imageUrl
 					})
 					.eq("id", editingId);
 
@@ -305,6 +327,8 @@ export default function InventoryPanel({ initialBarcode }) {
 				setCost_price(item.cost_price);
 				setSelling_price(item.selling_price);
 				setStock(item.stock);
+				setImagePreview(item.image_url || "");
+				setImageFile(null);
 				
 				toast.info(`Editing "${item.name}"`, {
 					duration: 2000,
@@ -417,6 +441,8 @@ export default function InventoryPanel({ initialBarcode }) {
 		setCost_price("");
 		setSelling_price("");
 		setStock("");
+		setImageFile(null);
+		setImagePreview("");
 		
 		toast.info('Form cleared', {
 			duration: 2000,
@@ -556,6 +582,36 @@ export default function InventoryPanel({ initialBarcode }) {
 						</div>
 
 						<form onSubmit={handleSaveProduct} className="p-6 space-y-4">
+							<div>
+								<label className="block text-xs font-bold text-gray-600 uppercase mb-2">
+									Product Photo
+								</label>
+
+								<input
+									type="file"
+									accept="image/*"
+									onChange={(e) => {
+									const file = e.target.files[0];
+
+									if (file) {
+										setImageFile(file);
+										setImagePreview(URL.createObjectURL(file));
+									}
+									}}
+									className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl"
+								/>
+
+								{imagePreview && (
+									<div className="mt-3">
+									<img
+										src={imagePreview}
+										alt="Preview"
+										className="w-32 h-32 object-cover rounded-xl border"
+									/>
+									</div>
+								)}
+							</div>
+
 							<div>
 								<label className="block text-xs font-bold text-gray-600 uppercase mb-2">
 									Product Name <span className="font-googlesans text-red-500">*</span>
@@ -758,8 +814,14 @@ export default function InventoryPanel({ initialBarcode }) {
 										<div
 											key={item.id}
 											className="p-5 hover:bg-gray-50 transition-all duration-200 group">
-											<div className="flex justify-between items-start mb-3">
-												<div className="flex-1">
+											<div className="flex justify-between items-start gap-4 mb-3">
+  												<div className="flex gap-4 flex-1">
+												
+													<img
+														src={item.image_url || "/no-image.png"}
+														alt={item.name}
+														className="w-20 h-20 object-cover rounded-xl border shadow-sm"
+														/>
 													<div className="flex items-center gap-2 flex-wrap">
 														<h4 className="font-bold text-gray-800 text-base">
 															{item.name}
