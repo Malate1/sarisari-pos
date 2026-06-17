@@ -166,7 +166,7 @@ export default function InventoryPanel({ initialBarcode }) {
 
 		try {
 
-			let imageUrl = imagePreview;
+			let imageUrl = "";
 
 			if (imageFile) {
 				const fileName =
