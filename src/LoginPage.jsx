@@ -295,16 +295,7 @@ export default function LoginPage() {
           </button>
 
           {/* Demo Credentials Hint */}
-          {isLogin && (
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-              <p className="text-xs text-blue-800 font-semibold mb-2">📝 Demo Credentials</p>
-              <p className="text-xs text-blue-700">Username: admin</p>
-              <p className="text-xs text-blue-700">Password: admin123</p>
-              <p className="text-xs text-gray-500 mt-2">
-                *Create an account to get started, or ask your store administrator for credentials
-              </p>
-            </div>
-          )}
+          
         </div>
       </div>
 
