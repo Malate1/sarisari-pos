@@ -24,6 +24,7 @@ export default function App() {
 	const [selectedSale, setSelectedSale] = useState(null);
 	const [showSaleDetails, setShowSaleDetails] = useState(false);
 	const searchRef = useRef(null);
+	const cartRef = useRef(null);
 
 	const [cart, setCart] = useState([]);
 	const [cashReceived, setCashReceived] = useState("");
@@ -229,6 +230,8 @@ export default function App() {
 			if (item) {
 				addToCart(item);
 
+				scrollToCartOnMobile();
+
 				setManualBarcode("");
 
 				toast.success(`${item.name} added to cart!`, {
@@ -252,6 +255,7 @@ export default function App() {
 
 	const handleSuggestionClick = (product) => {
 		addToCart(product);
+		 scrollToCartOnMobile();
 		setManualBarcode("");
 		setShowSuggestions(false);
 		setSearchSuggestions([]);
@@ -524,6 +528,25 @@ export default function App() {
 				duration: 2000,
 				position: "top-right",
 			});
+		}
+	};
+
+	const [cartHighlight, setCartHighlight] = useState(false);
+
+	const scrollToCartOnMobile = () => {
+		if (window.innerWidth < 1024) {
+			setTimeout(() => {
+			cartRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+
+			setCartHighlight(true);
+
+			setTimeout(() => {
+				setCartHighlight(false);
+			}, 1500);
+			}, 100);
 		}
 	};
 
@@ -854,7 +877,14 @@ export default function App() {
 
 						{/* Right Column - Shopping Cart */}
 						<div className="lg:col-span-3">
-							<div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-full flex flex-col">
+							<div
+								ref={cartRef}
+								className={`bg-white rounded-2xl shadow-xl border overflow-hidden h-full flex flex-col transition-all duration-500 ${
+									cartHighlight
+									? "ring-4 ring-green-400 border-green-400"
+									: "border-gray-100"
+								}`}
+								>
 								{/* Cart Header */}
 								<div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
 									<div className="flex justify-between items-center">
