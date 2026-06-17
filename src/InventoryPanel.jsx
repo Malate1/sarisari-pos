@@ -152,7 +152,7 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [stock, setStock] = useState("");
 	const [searchTerm, setSearchTerm] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState("all");
-	const imageUrl = "";
+	let imageUrl = "";
 	// Update barcode when initialBarcode prop changes
 	useEffect(() => {
 		if (initialBarcode) {
