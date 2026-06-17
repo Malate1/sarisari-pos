@@ -2,9 +2,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import toast, { Toaster } from "react-hot-toast";
+import Scanner from "./Scanner";
 import { db } from "./db";
 
 export default function CreditPanel({ onClose }) {
+	const [showScanner, setShowScanner] = useState(false);
 	const [customerName, setCustomerName] = useState("");
 	const [customerPhone, setCustomerPhone] = useState("");
 	const [dueDate, setDueDate] = useState("");
