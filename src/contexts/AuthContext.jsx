@@ -64,9 +64,11 @@ export const AuthProvider = ({ children }) => {
       const lastActivity = localStorage.getItem("last_activity");
 
       if (lastActivity) {
+        const INACTIVITY_TIME = 1 * 60 * 1000; // 1 minute
         const inactiveFor = Date.now() - parseInt(lastActivity, 10);
 
-        if (inactiveFor >= 2 * 60 * 60 * 1000) {
+        //if (inactiveFor >= 2 * 60 * 60 * 1000) {
+        if (inactiveFor >= INACTIVITY_TIME) {
           localStorage.removeItem("pos_user");
           localStorage.removeItem("last_activity");
         } else {
