@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { db } from "../db";
-import toast from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
 const AuthContext = createContext({});
 
@@ -181,6 +181,30 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
+      <Toaster
+				position="top-right"
+				toastOptions={{
+					duration: 3000,
+					style: {
+						background: "#363636",
+						color: "#fff",
+					},
+					success: {
+						duration: 2000,
+						iconTheme: {
+							primary: "#10b981",
+							secondary: "#fff",
+						},
+					},
+					error: {
+						duration: 3000,
+						iconTheme: {
+							primary: "#ef4444",
+							secondary: "#fff",
+						},
+					},
+				}}
+			/>
       {children}
     </AuthContext.Provider>
   );
