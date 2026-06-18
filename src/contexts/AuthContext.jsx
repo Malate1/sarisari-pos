@@ -21,21 +21,23 @@ export const AuthProvider = ({ children }) => {
   // Check for existing session on mount
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    const INACTIVITY_TIME = 2 * 60 * 60 * 1000; // 2 hours
+    console.log("Timer started");
+    const INACTIVITY_TIME = 1 * 60 * 1000; // 1 minute
 
     let timeoutId;
 
     const resetTimer = () => {
+      localStorage.setItem("last_activity", Date.now().toString());
+
       clearTimeout(timeoutId);
 
       timeoutId = setTimeout(() => {
+        console.log("Session expired");
         toast.error("Session expired due to inactivity");
         signOut();
       }, INACTIVITY_TIME);
     };
 
-    // User activity events
     const events = [
       "mousemove",
       "mousedown",
@@ -47,7 +49,6 @@ export const AuthProvider = ({ children }) => {
 
     events.forEach((event) => window.addEventListener(event, resetTimer));
 
-    // Start timer
     resetTimer();
 
     return () => {
@@ -81,17 +82,6 @@ export const AuthProvider = ({ children }) => {
 
     setLoading(false);
   }, []);
-
-  const resetTimer = () => {
-    localStorage.setItem("last_activity", Date.now().toString());
-
-    clearTimeout(timeoutId);
-
-    timeoutId = setTimeout(() => {
-      toast.error("Session expired due to inactivity");
-      signOut();
-    }, INACTIVITY_TIME);
-  };
 
   const signIn = async (username, password) => {
     try {
