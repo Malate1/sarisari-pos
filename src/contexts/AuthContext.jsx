@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!isAuthenticated) return;
     console.log("Timer started");
-    const INACTIVITY_TIME = 1 * 60 * 1000; // 1 minute
+    const INACTIVITY_TIME = 2 * 60 * 60 * 1000; // 2 hours
 
     let timeoutId;
 
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       const lastActivity = localStorage.getItem("last_activity");
 
       if (lastActivity) {
-        const INACTIVITY_TIME = 1 * 60 * 1000; // 1 minute
+        const INACTIVITY_TIME = 2 * 60 * 60 * 1000; // 2 hours
         const inactiveFor = Date.now() - parseInt(lastActivity, 10);
 
         //if (inactiveFor >= 2 * 60 * 60 * 1000) {
