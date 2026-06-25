@@ -581,73 +581,87 @@ export default function App() {
 			{/* Modern Header */}
 			<header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-				<div className="flex justify-between items-center">
+
+					{/* Top Section */}
+					<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+
+					{/* Logo */}
 					<div className="flex items-center space-x-3">
-					<div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg">
+						<div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg">
 						<span className="text-2xl">🏪</span>
-					</div>
-					<div>
-						<h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-						LM SariHub 2026
+						</div>
+
+						<div>
+						<h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+							LM SariHub
 						</h1>
 						<p className="text-xs text-gray-500 font-medium">
-						Online Store Manager v1.0
+							Online Store Manager v1.0
 						</p>
-					</div>
+						</div>
 					</div>
 
-					<div className="flex items-center gap-4">
-					{/* User Info */}
-					
-					<div className="hidden md:flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-xl">
-					<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-						<span className="text-white text-sm">👤</span>
-					</div>
-					<div className="text-left">
-						<p className="text-xs font-medium text-gray-600">Welcome,</p>
-						<p className="text-sm font-semibold text-gray-800">
-						{user?.name || user?.username}
-						</p>
-					</div>
-					</div>
+					{/* User & Logout */}
+					<div className="flex items-center justify-between sm:justify-end gap-3">
 
-					{/* Logout Button */}
-					<button
+						<div className="hidden sm:flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-xl">
+						<div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+							<span className="text-white text-sm">👤</span>
+						</div>
+
+						<div className="text-left">
+							<p className="text-xs font-medium text-gray-600">
+							Welcome,
+							</p>
+							<p className="text-sm font-semibold text-gray-800">
+							{user?.name || user?.username}
+							</p>
+						</div>
+						</div>
+
+						<button
 						onClick={signOut}
 						className="px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all duration-200 hover:shadow-lg flex items-center gap-2"
-					>
+						>
 						<LogOut size={16} />
-						<span className="hidden md:inline">Logout</span>
-					</button>
+						<span className="hidden sm:inline">Logout</span>
+						</button>
 					</div>
-				</div>
+					</div>
 
-				{/* Action Buttons - Your existing code */}
-				<div className="flex gap-3 mt-4">
+					{/* Action Buttons */}
+					<div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 mt-4">
+
 					<button
-					onClick={handleExportBackup}
-					className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105">
-					💾 Backup Data
+						onClick={handleExportBackup}
+						className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200"
+					>
+						💾 Backup Data
 					</button>
 
 					<button
-					onClick={() => setShowInventory(!showInventory)}
-					className="px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all duration-200 hover:shadow-lg hover:scale-105">
-					{showInventory ? "🛒 POS Register" : "📦 Inventory"}
+						onClick={() => setShowInventory(!showInventory)}
+						className="w-full sm:w-auto px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all duration-200"
+					>
+						{showInventory ? "🛒 POS Register" : "📦 Inventory"}
 					</button>
 
 					<button
-					onClick={() => setShowCreditPanel(true)}
-					className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105">
-					📝 Credit
+						onClick={() => setShowCreditPanel(true)}
+						className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200"
+					>
+						📝 Credit
 					</button>
 
 					<button
-					onClick={() => setShowReports(true)}
-					className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105">
-					📊 Reports
+						onClick={() => setShowReports(true)}
+						className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200"
+					>
+						📊 Reports
 					</button>
-				</div>
+
+					</div>
+
 				</div>
 			</header>
 
