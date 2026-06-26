@@ -1073,39 +1073,39 @@ export default function InventoryPanel({ initialBarcode }) {
 
 			{/* Custom Scrollbar Styles */}
 			<style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 10px;
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
+				.custom-scrollbar::-webkit-scrollbar {
+				width: 8px;
+				}
+				
+				.custom-scrollbar::-webkit-scrollbar-track {
+				background: #f1f1f1;
+				border-radius: 10px;
+				}
+				
+				.custom-scrollbar::-webkit-scrollbar-thumb {
+				background: #cbd5e1;
+				border-radius: 10px;
+				}
+				
+				.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+				background: #94a3b8;
+				}
 
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
+				@keyframes fadeIn {
+				from {
+					opacity: 0;
+					transform: translateY(-10px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+				}
+				
+				.animate-fadeIn {
+				animation: fadeIn 0.3s ease-out;
+				}
+			`}</style>
 		</div>
 	);
 }
