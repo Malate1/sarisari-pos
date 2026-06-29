@@ -103,7 +103,8 @@ export default function LoginPage() {
         <div className="grid-pattern"></div>
       </div>
 
-      <div className="cover-wrapper">
+      {/* Desktop Cover Layout */}
+      <div className="cover-wrapper desktop-cover">
         {/* Left Panel - Brand Cover */}
         <div className="brand-panel">
           <div className="deco-circle-1"></div>
@@ -290,6 +291,135 @@ export default function LoginPage() {
         </div>
       </div>
 
+      {/* Mobile Standard Layout */}
+      <div className="mobile-layout">
+        <div className="mobile-brand">
+          <div className="mobile-brand-icon">
+            <span>🏪</span>
+          </div>
+          <h1 className="mobile-brand-title">LM SariHub</h1>
+          <p className="mobile-brand-subtitle">
+            {isLogin ? 'Welcome back!' : 'Create your account'}
+          </p>
+        </div>
+
+        <div className="mobile-form-card">
+          <div className="mobile-form-header">
+            <h3>{isLogin ? 'Sign In' : 'Create Account'}</h3>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mobile-form-fields">
+            {!isLogin && (
+              <div className="field-group">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleInputChange}
+                  placeholder="Enter your full name"
+                  disabled={isSubmitting || loading}
+                />
+                {errors.fullName && <p className="error-text">{errors.fullName}</p>}
+              </div>
+            )}
+
+            <div className="field-group">
+              <label>Username</label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                placeholder="Enter your username"
+                disabled={isSubmitting || loading}
+                autoComplete="username"
+              />
+              {errors.username && <p className="error-text">{errors.username}</p>}
+            </div>
+
+            <div className="field-group">
+              <label>Password</label>
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="••••••••"
+                  disabled={isSubmitting || loading}
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="toggle-password"
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? '👁️‍🗨️' : '👁️'}
+                </button>
+              </div>
+              {errors.password && <p className="error-text">{errors.password}</p>}
+            </div>
+
+            {!isLogin && (
+              <div className="field-group">
+                <label>Confirm Password</label>
+                <div className="password-wrapper">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    placeholder="••••••••"
+                    disabled={isSubmitting || loading}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="toggle-password"
+                    aria-label="Toggle confirm password visibility"
+                  >
+                    {showConfirmPassword ? '👁️‍🗨️' : '👁️'}
+                  </button>
+                </div>
+                {errors.confirmPassword && <p className="error-text">{errors.confirmPassword}</p>}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting || loading}
+              className="submit-button mobile-submit"
+            >
+              {isSubmitting || loading ? (
+                <>
+                  <div className="spinner"></div>
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+              )}
+            </button>
+          </form>
+
+          <div className="mobile-divider">
+            <span>
+              {isLogin ? "Don't have an account?" : "Already have an account?"}
+            </span>
+          </div>
+
+          <button
+            onClick={toggleMode}
+            disabled={isSubmitting || loading}
+            className="mobile-toggle-button"
+          >
+            {isLogin ? 'Create New Account' : 'Sign In Instead'}
+          </button>
+        </div>
+      </div>
+
       <style>
         {`
           /* Reset and Base */
@@ -371,7 +501,7 @@ export default function LoginPage() {
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
           }
 
-          /* Cover Wrapper */
+          /* ===== DESKTOP COVER LAYOUT ===== */
           .cover-wrapper {
             position: relative;
             width: 100%;
@@ -588,12 +718,125 @@ export default function LoginPage() {
             margin-top: 0.25rem;
           }
 
-          .form-fields {
-            display: flex;
+          /* ===== MOBILE STANDARD LAYOUT ===== */
+          .mobile-layout {
+            display: none;
+            width: 100%;
+            max-width: 28rem;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
+            animation: fadeIn 0.6s ease-out;
           }
 
+          .mobile-brand {
+            text-align: center;
+            padding: 0.5rem 0;
+          }
+
+          .mobile-brand-icon {
+            width: 4rem;
+            height: 4rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3);
+          }
+
+          .mobile-brand-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+          }
+
+          .mobile-brand-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+          }
+
+          .mobile-form-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+          }
+
+          .mobile-form-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+          }
+
+          .mobile-form-header h3 {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 700;
+          }
+
+          .mobile-form-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 0.875rem;
+          }
+
+          .mobile-submit {
+            margin-top: 0.5rem;
+          }
+
+          .mobile-divider {
+            position: relative;
+            margin: 1.25rem 0;
+          }
+
+          .mobile-divider::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .mobile-divider span {
+            position: relative;
+            display: block;
+            text-align: center;
+            padding: 0 1rem;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.875rem;
+          }
+
+          .mobile-toggle-button {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .mobile-toggle-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+          }
+
+          .mobile-toggle-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          /* Shared Form Styles */
           .field-group {
             display: flex;
             flex-direction: column;
@@ -687,7 +930,6 @@ export default function LoginPage() {
             justify-content: center;
             gap: 0.5rem;
             box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.2);
-            margin-top: 0.5rem;
           }
 
           .submit-button:hover:not(:disabled) {
@@ -703,16 +945,6 @@ export default function LoginPage() {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
-          }
-
-          .spinner {
-            width: 1.25rem;
-            height: 1.25rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            flex-shrink: 0;
           }
 
           .divider {
@@ -762,6 +994,16 @@ export default function LoginPage() {
             cursor: not-allowed;
           }
 
+          .spinner {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+          }
+
           /* Animations */
           @keyframes pulse {
             0%, 100% {
@@ -791,92 +1033,19 @@ export default function LoginPage() {
 
           /* ===== RESPONSIVE BREAKPOINTS ===== */
 
-          /* Large Desktops */
-          @media (min-width: 1441px) {
-            .brand-panel {
-              padding: 4rem 5rem;
-              min-height: 700px;
-            }
-            .form-panel {
-              padding: 4rem 5rem;
-            }
-            .hero-title {
-              font-size: 3rem;
-            }
-          }
-
-          /* Tablets & Small Laptops */
+          /* Tablets & Small Laptops - Switch to Mobile Layout */
           @media (max-width: 1024px) {
             .cover-wrapper {
-              grid-template-columns: 1fr;
-              max-width: 28rem;
-              max-height: none;
-              border-radius: 1.25rem;
-            }
-
-            .brand-panel {
-              padding: 2rem 2rem;
-              min-height: 350px;
-              order: 1;
-            }
-
-            .form-panel {
-              padding: 2rem 2rem;
-              order: 2;
-              backdrop-filter: blur(16px);
-              -webkit-backdrop-filter: blur(16px);
-            }
-
-            .brand-content {
-              justify-content: flex-start;
-            }
-
-            .brand-header {
-              margin-bottom: 1.5rem;
-            }
-
-            .brand-header .brand-icon {
-              width: 3rem;
-              height: 3rem;
-              font-size: 1.5rem;
-            }
-
-            .brand-title {
-              font-size: 1.25rem;
-            }
-
-            .hero-title {
-              font-size: 2rem;
-              margin-bottom: 0.75rem;
-            }
-
-            .hero-description {
-              font-size: 1rem;
-              max-width: 100%;
-            }
-
-            .feature-grid {
-              grid-template-columns: repeat(4, 1fr);
-              padding-top: 1.5rem;
-              gap: 0.75rem;
-            }
-
-            .feature-item {
-              font-size: 0.75rem;
-            }
-
-            .feature-item span:first-child {
-              font-size: 1rem;
-            }
-
-            .status-indicators {
-              gap: 1rem;
-            }
-
-            .deco-circle-1,
-            .deco-circle-2,
-            .deco-circle-3 {
               display: none;
+            }
+
+            .mobile-layout {
+              display: flex;
+            }
+
+            .blur-circle-1,
+            .blur-circle-2 {
+              opacity: 0.15;
             }
           }
 
@@ -884,82 +1053,36 @@ export default function LoginPage() {
           @media (max-width: 640px) {
             .login-container {
               padding: 0.75rem;
+              align-items: flex-start;
+              padding-top: 2rem;
             }
 
-            .cover-wrapper {
+            .mobile-layout {
               max-width: 100%;
+              gap: 1.25rem;
+            }
+
+            .mobile-form-card {
+              padding: 1.5rem;
               border-radius: 1rem;
             }
 
-            .brand-panel {
-              padding: 1.5rem 1.25rem;
-              min-height: 280px;
+            .mobile-brand-icon {
+              width: 3.5rem;
+              height: 3.5rem;
+              font-size: 1.75rem;
             }
 
-            .form-panel {
-              padding: 1.5rem 1.25rem;
-            }
-
-            .brand-header {
-              gap: 0.5rem;
-              margin-bottom: 1rem;
-            }
-
-            .brand-icon {
-              width: 2.5rem;
-              height: 2.5rem;
+            .mobile-brand-title {
               font-size: 1.25rem;
-              border-radius: 0.75rem;
             }
 
-            .brand-title {
+            .mobile-brand-subtitle {
+              font-size: 0.75rem;
+            }
+
+            .mobile-form-header h3 {
               font-size: 1.125rem;
-            }
-
-            .brand-subtitle {
-              font-size: 0.75rem;
-            }
-
-            .hero-title {
-              font-size: 1.5rem;
-              margin-bottom: 0.5rem;
-            }
-
-            .hero-description {
-              font-size: 0.875rem;
-              line-height: 1.5;
-            }
-
-            .status-indicators {
-              flex-direction: column;
-              gap: 0.5rem;
-              padding-top: 0.5rem;
-            }
-
-            .status-item {
-              font-size: 0.75rem;
-            }
-
-            .feature-grid {
-              grid-template-columns: repeat(2, 1fr);
-              padding-top: 1rem;
-              gap: 0.5rem;
-            }
-
-            .feature-item {
-              font-size: 0.75rem;
-            }
-
-            .form-header h3 {
-              font-size: 1.25rem;
-            }
-
-            .form-header p {
-              font-size: 0.75rem;
-            }
-
-            .form-header {
-              margin-bottom: 1.5rem;
             }
 
             .field-group label {
@@ -983,130 +1106,101 @@ export default function LoginPage() {
               border-radius: 0.625rem;
             }
 
-            .toggle-button {
+            .mobile-toggle-button {
               padding: 0.625rem;
               font-size: 0.75rem;
               border-radius: 0.625rem;
             }
 
-            .divider {
-              margin: 1.25rem 0;
+            .mobile-divider {
+              margin: 1rem 0;
             }
 
-            .divider span {
+            .mobile-divider span {
               font-size: 0.75rem;
             }
           }
 
           /* Small Mobile Devices */
           @media (max-width: 380px) {
-            .brand-panel {
-              padding: 1.25rem 1rem;
-              min-height: 240px;
+            .login-container {
+              padding: 0.5rem;
+              padding-top: 1.5rem;
             }
 
-            .form-panel {
-              padding: 1.25rem 1rem;
+            .mobile-form-card {
+              padding: 1.25rem;
             }
 
-            .hero-title {
-              font-size: 1.25rem;
+            .mobile-brand-icon {
+              width: 3rem;
+              height: 3rem;
+              font-size: 1.5rem;
             }
 
-            .brand-title {
-              font-size: 1rem;
-            }
-
-            .brand-icon {
-              width: 2.25rem;
-              height: 2.25rem;
-              font-size: 1rem;
-            }
-
-            .feature-grid {
-              grid-template-columns: 1fr 1fr;
-              gap: 0.25rem;
-            }
-
-            .feature-item {
-              font-size: 0.675rem;
-            }
-
-            .feature-item span:first-child {
-              font-size: 0.875rem;
+            .mobile-brand-title {
+              font-size: 1.125rem;
             }
           }
 
           /* Landscape Mobile */
           @media (max-height: 600px) and (orientation: landscape) {
-            .cover-wrapper {
-              max-height: 90vh;
-              max-height: 90dvh;
+            .login-container {
+              padding: 0.5rem;
+              align-items: center;
             }
 
-            .brand-panel {
-              min-height: 300px;
-              padding: 1.5rem;
+            .mobile-layout {
+              flex-direction: row;
+              max-width: 100%;
+              gap: 1rem;
+              align-items: stretch;
             }
 
-            .form-panel {
-              padding: 1.5rem;
-              overflow-y: auto;
+            .mobile-brand {
+              flex: 0 0 30%;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              padding: 0.5rem;
             }
 
-            .brand-header {
-              margin-bottom: 1rem;
-            }
-
-            .hero-title {
-              font-size: 1.5rem;
-              margin-bottom: 0.5rem;
-            }
-
-            .hero-description {
-              font-size: 0.875rem;
-            }
-
-            .brand-icon {
+            .mobile-brand-icon {
               width: 2.5rem;
               height: 2.5rem;
               font-size: 1.25rem;
             }
 
-            .feature-grid {
-              padding-top: 1rem;
+            .mobile-brand-title {
+              font-size: 1rem;
             }
 
-            .form-fields {
-              gap: 0.75rem;
+            .mobile-form-card {
+              flex: 1;
+              padding: 1rem;
+              max-height: 85vh;
+              overflow-y: auto;
             }
 
-            .form-header {
-              margin-bottom: 1rem;
+            .mobile-form-fields {
+              gap: 0.5rem;
             }
 
-            .form-header h3 {
-              font-size: 1.25rem;
+            .field-group input {
+              padding: 0.5rem 0.75rem;
+              font-size: 0.75rem;
             }
-          }
 
-          /* High DPI Screens */
-          @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            .grid-pattern {
-              background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            }
-          }
-
-          /* Dark Mode Support */
-          @media (prefers-color-scheme: dark) {
-            .login-container {
-              background: #0a0a0f;
+            .submit-button {
+              padding: 0.5rem;
+              font-size: 0.75rem;
             }
           }
 
           /* Reduced Motion */
           @media (prefers-reduced-motion: reduce) {
-            .cover-wrapper {
+            .cover-wrapper,
+            .mobile-layout {
               animation: none;
             }
             
@@ -1121,6 +1215,13 @@ export default function LoginPage() {
 
             .submit-button:hover:not(:disabled) {
               transform: none;
+            }
+          }
+
+          /* Dark Mode Support */
+          @media (prefers-color-scheme: dark) {
+            .login-container {
+              background: #0a0a0f;
             }
           }
         `}
