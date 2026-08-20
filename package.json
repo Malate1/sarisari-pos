@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
+    "@vercel/analytics": "^1.4.1",
     "cors": "^2.8.6",
     "dexie": "^4.4.3",
     "dexie-react-hooks": "^4.4.0",
