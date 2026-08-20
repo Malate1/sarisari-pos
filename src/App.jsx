@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import toast, { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/react";
 import Scanner from "./Scanner";
 import InventoryPanel from "./InventoryPanel";
 import CreditPanel from "./CreditPanel";
@@ -1249,6 +1250,7 @@ export default function App() {
 			)}
 
 			{showReports && <ReportsPanel onClose={() => setShowReports(false)} />}
+			<Analytics />
 		</div>
 	);
 }
