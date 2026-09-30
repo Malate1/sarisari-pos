@@ -13,6 +13,7 @@ export default function InventoryPanel({ initialBarcode }) {
 	const [imageFile, setImageFile] = useState(null);
 	const [imagePreview, setImagePreview] = useState("");
 	const [showCamera, setShowCamera] = useState(false);
+	const productFormRef = useRef(null);
 	const videoRef = useRef(null);
 	const canvasRef = useRef(null);
 	const streamRef = useRef(null);
@@ -130,21 +131,12 @@ export default function InventoryPanel({ initialBarcode }) {
 	};
 
 	const scrollToProductInfo = () => {
-		window.setTimeout(() => {
-			const productForm = document.getElementById("product-form");
-			if (!productForm) return;
-
-			const stickyHeader = document.querySelector(".pos-header");
-			const headerOffset = stickyHeader?.getBoundingClientRect().height || 0;
-			const scrollRoot = document.scrollingElement || document.documentElement;
-			const currentScroll = scrollRoot.scrollTop || window.scrollY || 0;
-			const top = productForm.getBoundingClientRect().top + currentScroll - headerOffset - 12;
-			const scrollToForm = () => {
-				scrollRoot.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-				productForm.scrollIntoView({ behavior: "smooth", block: "start" });
-			};
-			window.requestAnimationFrame(() => window.requestAnimationFrame(scrollToForm));
-		}, 450);
+		setTimeout(() => {
+			productFormRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+		}, 120);
 	};
 
 	const scrollToProductInfoOnMobile = () => {
@@ -677,6 +669,7 @@ export default function InventoryPanel({ initialBarcode }) {
 				<section className="lg:col-span-2">
 					<div
 						id="product-form"
+						ref={productFormRef}
 						className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden hover:shadow-2xl transition-shadow duration-300">
 						<div
 							className={`bg-gradient-to-r ${editingId ? "from-orange-500 to-red-500" : "from-blue-600 to-purple-600"} px-6 py-4`}>
