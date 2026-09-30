@@ -130,11 +130,15 @@ export default function InventoryPanel({ initialBarcode }) {
 	};
 
 	const scrollToProductInfo = () => {
-		setTimeout(() => {
-			document
-				.getElementById("product-form")
-				?.scrollIntoView({ behavior: "smooth", block: "start" });
-		}, 120);
+		window.setTimeout(() => {
+			const productForm = document.getElementById("product-form");
+			if (!productForm) return;
+
+			const stickyHeader = document.querySelector(".pos-header");
+			const headerOffset = stickyHeader?.getBoundingClientRect().height || 0;
+			const top = productForm.getBoundingClientRect().top + window.scrollY - headerOffset - 12;
+			window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+		}, 350);
 	};
 
 	const scrollToProductInfoOnMobile = () => {
@@ -408,39 +412,17 @@ export default function InventoryPanel({ initialBarcode }) {
 
 	// Populate data inputs into form fields for correction editing
 	const startEdit = (item) => {
-		Swal.fire({
-			title: '✏️ Edit Product',
-			text: `Are you sure you want to edit "${item.name}"?`,
-			icon: 'question',
-			showCancelButton: true,
-			confirmButtonColor: '#f59e0b',
-			cancelButtonColor: '#6b7280',
-			confirmButtonText: '✅ Yes, Edit',
-			cancelButtonText: '❌ No, Cancel',
-		}).then((result) => {
-			if (result.isConfirmed) {
-				setEditingId(item.id);
-				setName(item.name);
-				setBarcode(item.barcode || "");
-				setCost_price(item.cost_price);
-				setSelling_price(item.selling_price);
-				setStock(item.stock);
-				setImagePreview(item.image_url || "");
-				setImageFile(null);
-				
-				toast.info(`Editing "${item.name}"`, {
-					duration: 2000,
-					position: 'top-right',
-				});
-				
-				scrollToProductInfo();
-			} else {
-				toast.info('Edit cancelled', {
-					duration: 2000,
-					position: 'top-right',
-				});
-			}
-		});
+		setEditingId(item.id);
+		setName(item.name);
+		setBarcode(item.barcode || "");
+		setCost_price(item.cost_price);
+		setSelling_price(item.selling_price);
+		setStock(item.stock);
+		setImagePreview(item.image_url || "");
+		setImageFile(null);
+
+		toast.info(`Editing "${item.name}"`, { duration: 2000, position: "top-right" });
+		scrollToProductInfo();
 	};
 
 	// Delete product entry from IndexedDB permanently
