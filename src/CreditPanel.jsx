@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import toast, { Toaster } from "react-hot-toast";
 import Scanner from "./Scanner";
 import { db } from "./db";
+import { Camera } from "lucide-react";
 
 export default function CreditPanel({ onClose }) {
 	const [showScanner, setShowScanner] = useState(false);
@@ -157,6 +158,35 @@ export default function CreditPanel({ onClose }) {
 		} else {
 			toast.error(`Product "${searchTerm}" not found in inventory.`);
 		}
+	};
+
+	const handleCreditBarcodeScan = (barcode) => {
+		const product = inventory.find(
+			(item) =>
+				String(item.barcode || "").trim().toLowerCase() ===
+				barcode.trim().toLowerCase(),
+		);
+
+		if (!product) {
+			toast.error(`Barcode "${barcode}" was not found in inventory.`);
+			return;
+		}
+
+		const cartItem = cart.find((item) => item.id === product.id);
+		if (Number(product.stock) <= 0) {
+			toast.error(`"${product.name}" is out of stock.`);
+			return;
+		}
+		if (cartItem && cartItem.quantity >= Number(product.stock)) {
+			toast.error(`Only ${product.stock} pcs available.`);
+			return;
+		}
+
+		addToCart(product);
+		setSearchTerm("");
+		setSearchResults([]);
+		setShowSuggestions(false);
+		toast.success(`${product.name} added to credit items.`);
 	};
 
 	const addToCart = (product) => {
@@ -677,9 +707,19 @@ export default function CreditPanel({ onClose }) {
 													}
 												}}
 												placeholder="Type product name or barcode..."
-												className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:outline-none text-base"
+												className="w-full pl-10 pr-24 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-400 focus:outline-none text-base"
 												autoComplete="off"
 											/>
+											<button
+												type="button"
+												onClick={() => setShowScanner((show) => !show)}
+												className={`absolute right-1.5 top-1.5 inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-colors ${showScanner ? "bg-red-50 text-red-700 hover:bg-red-100" : "bg-blue-600 text-white hover:bg-blue-700"}`}
+													aria-label={
+														showScanner ? "Close barcode scanner" : "Scan product barcode"
+													}>
+												<Camera size={16} />
+												{showScanner ? "Close" : "Scan"}
+											</button>
 											<span className="absolute left-3 top-3.5 text-gray-400">
 												🔍
 											</span>
@@ -754,6 +794,15 @@ export default function CreditPanel({ onClose }) {
 												</>
 											)}
 										</div>
+
+										{showScanner && (
+											<div className="mt-4">
+												<Scanner
+													onScanSuccess={handleCreditBarcodeScan}
+													onClose={() => setShowScanner(false)}
+												/>
+											</div>
+										)}
 
 										{/* Quick tip */}
 										<div className="mt-2 text-xs text-gray-400">
