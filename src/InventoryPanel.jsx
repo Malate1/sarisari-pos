@@ -129,6 +129,15 @@ export default function InventoryPanel({ initialBarcode }) {
 		}
 	};
 
+	const scrollToProductInfoOnMobile = () => {
+		if (!window.matchMedia("(max-width: 767px)").matches) return;
+		setTimeout(() => {
+			document
+				.getElementById("product-form")
+				?.scrollIntoView({ behavior: "smooth", block: "start" });
+		}, 120);
+	};
+
 	const processInventoryBarcode = async (code) => {
 		try {
 			console.log('Processing barcode:', code);
@@ -160,6 +169,7 @@ export default function InventoryPanel({ initialBarcode }) {
 				setSelling_price(product.selling_price || '');
 				setStock(product.stock || '');
 				setImagePreview(product.image_url || '');
+				scrollToProductInfoOnMobile();
 				
 				toast.success(`Product "${product.name}" loaded! 🎉`, {
 					duration: 2000,
@@ -191,6 +201,7 @@ export default function InventoryPanel({ initialBarcode }) {
 					setCost_price('');
 					setSelling_price('');
 					setStock('');
+					scrollToProductInfoOnMobile();
 					
 					setTimeout(() => {
 						document.getElementById('product-name')?.focus();
@@ -417,9 +428,7 @@ export default function InventoryPanel({ initialBarcode }) {
 					position: 'top-right',
 				});
 				
-				document
-					.getElementById("product-form")
-					?.scrollIntoView({ behavior: "smooth" });
+				scrollToProductInfoOnMobile();
 			} else {
 				toast.info('Edit cancelled', {
 					duration: 2000,

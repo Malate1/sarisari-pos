@@ -24,6 +24,17 @@ export default function CreditPanel({ onClose }) {
 	const [filterStatus, setFilterStatus] = useState("all");
 	const searchRef = useRef(null);
 	const inputRef = useRef(null);
+	const creditCartRef = useRef(null);
+
+	const scrollToCreditInfoOnMobile = () => {
+		if (!window.matchMedia("(max-width: 767px)").matches) return;
+		setTimeout(() => {
+			creditCartRef.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+		}, 120);
+	};
 
 	// Fetch inventory from database
 	const [inventory, setInventory] = useState([]);
@@ -194,6 +205,15 @@ export default function CreditPanel({ onClose }) {
 			console.error("Invalid product:", product);
 			return;
 		}
+		const currentItem = cart.find((item) => item.id === product.id);
+		if (Number(product.stock) <= 0) {
+			toast.error(`"${product.name}" is out of stock!`);
+			return;
+		}
+		if (currentItem && currentItem.quantity >= Number(product.stock)) {
+			toast.error(`Only ${product.stock} pcs available.`);
+			return;
+		}
 
 		setCart((prevCart) => {
 			const existingIndex = prevCart.findIndex(
@@ -225,6 +245,7 @@ export default function CreditPanel({ onClose }) {
 				];
 			}
 		});
+		scrollToCreditInfoOnMobile();
 	};
 
 	const updateQuantity = (id, newQty, totalStock) => {
@@ -814,7 +835,7 @@ export default function CreditPanel({ onClose }) {
 
 							{/* Right Column - Credit Cart */}
 							<div className="lg:col-span-3">
-								<div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden h-full flex flex-col">
+								<div ref={creditCartRef} className="credit-cart-target bg-white rounded-xl border-2 border-gray-200 overflow-hidden h-full flex flex-col">
 									<div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-3">
 										<h3 className="text-white font-bold flex items-center gap-2">
 											🛒 Credit Cart

@@ -919,7 +919,7 @@ export default function App() {
 						<div className="lg:col-span-3">
 							<div
 								ref={cartRef}
-								className={`bg-white rounded-2xl shadow-xl border overflow-hidden h-full flex flex-col transition-all duration-500 ${
+								className={`pos-cart-target bg-white rounded-2xl shadow-xl border overflow-hidden h-full flex flex-col transition-all duration-500 ${
 									cartHighlight
 									? "ring-4 ring-green-400 border-green-400"
 									: "border-gray-100"

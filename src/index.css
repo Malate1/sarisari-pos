@@ -89,6 +89,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .pos-shell [class~="text-green-100"] { color: #dbeafe !important; }
 .pos-search-card { border-radius: 18px !important; }
 .pos-search-card > div:first-child { border-radius: 18px 18px 0 0; }
+.pos-cart-target { scroll-margin-top: 148px; }
+.credit-cart-target { scroll-margin-top: 14px; }
 .pos-shell input:not([type="checkbox"]), .pos-shell select, .pos-shell textarea {
   min-height: 44px; border-color: #dce5df !important; border-radius: 11px !important; color: #1d3027;
 }
@@ -130,6 +132,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .pos-shell .fixed.inset-0.z-50 > .max-w-6xl,
   .pos-shell .fixed.inset-0.z-50 > .max-w-7xl,
   .pos-shell .fixed.inset-0.z-50 > .max-w-2xl { max-height: 94dvh !important; border-radius: 18px 18px 12px 12px !important; }
+}
+
+@media (max-width: 767px) {
+  #product-form { scroll-margin-top: 145px; }
 }
 
 @media (max-width: 380px) {
