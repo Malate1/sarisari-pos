@@ -129,13 +129,18 @@ export default function InventoryPanel({ initialBarcode }) {
 		}
 	};
 
-	const scrollToProductInfoOnMobile = () => {
-		if (!window.matchMedia("(max-width: 767px)").matches) return;
+	const scrollToProductInfo = () => {
 		setTimeout(() => {
 			document
 				.getElementById("product-form")
 				?.scrollIntoView({ behavior: "smooth", block: "start" });
 		}, 120);
+	};
+
+	const scrollToProductInfoOnMobile = () => {
+		if (window.matchMedia("(max-width: 767px)").matches) {
+			scrollToProductInfo();
+		}
 	};
 
 	const processInventoryBarcode = async (code) => {
@@ -428,7 +433,7 @@ export default function InventoryPanel({ initialBarcode }) {
 					position: 'top-right',
 				});
 				
-				scrollToProductInfoOnMobile();
+				scrollToProductInfo();
 			} else {
 				toast.info('Edit cancelled', {
 					duration: 2000,
