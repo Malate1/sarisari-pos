@@ -138,10 +138,20 @@ export default function InventoryPanel({ initialBarcode }) {
 	const scrollToProductInfoOnMobile = () => {
 		if (!window.matchMedia("(max-width: 767px)").matches) return;
 		setTimeout(() => {
-			productFormRef.current?.scrollIntoView({
-				behavior: "smooth",
-				block: "start",
-			});
+			const productForm = productFormRef.current;
+			if (!productForm) return;
+
+			const headerHeight =
+				document.querySelector(".pos-header")?.getBoundingClientRect().height || 0;
+			const scrollRoot = document.scrollingElement || document.documentElement;
+			const targetTop = Math.max(
+				0,
+				scrollRoot.scrollTop +
+					productForm.getBoundingClientRect().top -
+					headerHeight -
+					12,
+			);
+			scrollRoot.scrollTo({ top: targetTop, behavior: "smooth" });
 		}, 120);
 	};
 
