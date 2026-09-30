@@ -8,7 +8,7 @@ import CreditPanel from "./CreditPanel";
 import ReportsPanel from "./ReportsPanel";
 import { db } from "./db";
 import { useAuth } from "./contexts/AuthContext";  // Use named import
-import { LogOut, User } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export default function App() {
 	const { user, signOut } = useAuth();
@@ -342,6 +342,15 @@ export default function App() {
 	);
 	const changeDue =
 		Number(cashReceived) > totalAmount ? Number(cashReceived) - totalAmount : 0;
+	const todayKey = new Date().toLocaleDateString();
+	const todayTransactions = salesHistory.filter(
+		(sale) => new Date(sale.created_at).toLocaleDateString() === todayKey,
+	);
+	const todaySales = todayTransactions.reduce(
+		(sum, sale) => sum + Number(sale.total || 0),
+		0,
+	);
+	const lowStockCount = inventory.filter((item) => Number(item.stock) <= 5).length;
 
 	const handleCheckout = async () => {
 		if (cart.length === 0) return;
@@ -551,7 +560,7 @@ export default function App() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 font-sans">
+		<div className="pos-shell min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 font-sans">
 			{/* Toast Container */}
 			<Toaster
 				position="top-right"
@@ -579,7 +588,7 @@ export default function App() {
 			/>
 
 			{/* Modern Header */}
-			<header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+			<header className="pos-header bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
 					{/* Top Section */}
@@ -630,7 +639,7 @@ export default function App() {
 					</div>
 
 					{/* Action Buttons */}
-					<div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 mt-4">
+					<nav aria-label="Store tools" className="pos-nav grid grid-cols-2 sm:flex sm:flex-wrap gap-3 mt-4">
 
 					<button
 						onClick={handleExportBackup}
@@ -660,17 +669,34 @@ export default function App() {
 						📊 Reports
 					</button>
 
-					</div>
+					</nav>
 
 				</div>
 			</header>
 
 			{showInventory ? (
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+				<div className="pos-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 					<InventoryPanel initialBarcode={notFoundCode} />
 				</div>
 			) : (
-				<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+				<main className="pos-main max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+					<section className="pos-overview" aria-label="Today's store overview">
+						<div className="pos-overview-intro">
+							<p className="pos-eyebrow">STORE OVERVIEW</p>
+							<h2>Good day{user?.name ? `, ${user.name.split(" ")[0]}` : ""}</h2>
+							<p>Here’s how your store is doing today.</p>
+						</div>
+						<div className="pos-stat-card pos-stat-sales">
+							<span>Sales today</span>
+							<strong>₱{todaySales.toFixed(2)}</strong>
+							<small>{todayTransactions.length} transactions</small>
+						</div>
+						<div className={`pos-stat-card ${lowStockCount ? "pos-stat-alert" : ""}`}>
+							<span>Restock reminders</span>
+							<strong>{lowStockCount}</strong>
+							<small>{lowStockCount ? "Products with 5 or fewer left" : "Stock levels look good"}</small>
+						</div>
+					</section>
 					<div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 						{/* Left Column - Search & History */}
 						<div className="lg:col-span-2 space-y-6">
