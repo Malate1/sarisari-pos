@@ -6,6 +6,9 @@ import { db } from "./db";
 import Scanner from "./Scanner";
 
 export default function InventoryPanel({ initialBarcode }) {
+	const showInfoToast = (message, options = {}) =>
+		toast(message, { icon: "ℹ️", ...options });
+
 	// Pull inventory reactively from IndexedDB using useLiveQuery
 	const [inventoryList, setInventoryList] = useState([]);
 	const [showScanner, setShowScanner] = useState(false);
@@ -216,7 +219,7 @@ export default function InventoryPanel({ initialBarcode }) {
 						position: 'top-right',
 					});
 				} else {
-					toast.info('Product addition cancelled.', {
+					showInfoToast('Product addition cancelled.', {
 						duration: 2000,
 						position: 'top-right',
 					});
@@ -308,7 +311,7 @@ export default function InventoryPanel({ initialBarcode }) {
 			});
 
 			if (!confirmResult.isConfirmed) {
-				toast.info('Operation cancelled', {
+				showInfoToast('Operation cancelled', {
 					duration: 2000,
 					position: 'top-right',
 				});
@@ -428,7 +431,7 @@ export default function InventoryPanel({ initialBarcode }) {
 			setImagePreview(item.image_url || "");
 			setImageFile(null);
 
-			toast.info(`Editing "${item.name}"`, {
+			showInfoToast(`Editing "${item.name}"`, {
 				duration: 2000,
 				position: "top-right",
 			});
@@ -455,7 +458,7 @@ export default function InventoryPanel({ initialBarcode }) {
 		});
 
 		if (!result.isConfirmed) {
-			toast.info('Deletion cancelled', {
+			showInfoToast('Deletion cancelled', {
 				duration: 2000,
 				position: 'top-right',
 			});
@@ -524,7 +527,7 @@ export default function InventoryPanel({ initialBarcode }) {
 			});
 
 			if (!result.isConfirmed) {
-				toast.info('Form clear cancelled', {
+				showInfoToast('Form clear cancelled', {
 					duration: 2000,
 					position: 'top-right',
 				});
@@ -542,7 +545,7 @@ export default function InventoryPanel({ initialBarcode }) {
 		setImagePreview("");
 		setShowCamera(false);
 		
-		toast.info('Form cleared', {
+		showInfoToast('Form cleared', {
 			duration: 2000,
 			position: 'top-right',
 		});
