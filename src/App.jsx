@@ -701,7 +701,7 @@ export default function App() {
 						{/* Left Column - Search & History */}
 						<div className="lg:col-span-2 space-y-6">
 							{/* Barcode Search Card */}
-							<div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-visible hover:shadow-2xl transition-shadow duration-300">
+							<div className="pos-search-card bg-white rounded-2xl shadow-xl border border-gray-100 overflow-visible hover:shadow-2xl transition-shadow duration-300">
 								<div className="bg-gradient-to-r from-blue-600 to-purple-600 px-5 py-3">
 									<h3 className="font-googlesans text-white font-semibold text-sm flex items-center gap-2">
 										🔍 Scan or Search Product
