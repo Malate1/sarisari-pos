@@ -641,12 +641,12 @@ export default function App() {
 					{/* Action Buttons */}
 					<nav aria-label="Store tools" className="pos-nav grid grid-cols-2 sm:flex sm:flex-wrap gap-3 mt-4">
 
-					<button
+					{/* <button
 						onClick={handleExportBackup}
 						className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200"
 					>
 						💾 Backup Data
-					</button>
+					</button> */}
 
 					<button
 						onClick={() => setShowInventory(!showInventory)}
