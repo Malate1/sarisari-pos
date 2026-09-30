@@ -135,7 +135,7 @@ export default function InventoryPanel({ initialBarcode }) {
 	const scrollToProductInfoOnMobile = () => {
 		if (!window.matchMedia("(max-width: 767px)").matches) return;
 		setTimeout(() => {
-			creditCartRef.current?.scrollIntoView({
+			productFormRef.current?.scrollIntoView({
 				behavior: "smooth",
 				block: "start",
 			});
